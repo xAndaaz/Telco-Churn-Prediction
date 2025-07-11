@@ -3,6 +3,7 @@ import streamlit as st
 import pandas as pd
 import requests
 import json
+import sys
 
 # --- PAGE CONFIGURATION ---
 st.set_page_config(
@@ -32,27 +33,7 @@ try:
     if churning_customers.empty:
         st.warning("No customers are currently predicted to churn. Great news!")
     else:
-        # Load retention strategies (assuming the logic from retention_strategy.py)
-        def get_retention_strategy(row):
-            churn_drivers = row['top_churn_drivers']
-            clv_tier = row.get('clv_tier', 'Medium') # Default to medium if not present
-            
-            if clv_tier == 'High':
-                base_strategy = "Offer a 15% discount and a free premium service for 3 months."
-            elif clv_tier == 'Medium':
-                base_strategy = "Offer a 10% discount on the next bill."
-            else:
-                base_strategy = "Send a survey to understand their dissatisfaction."
-
-            if 'tenure_monthly_ratio' in churn_drivers:
-                return base_strategy + " Also, offer a longer-term contract with a lower monthly rate."
-            elif 'InternetService_Fiber optic' in churn_drivers:
-                return base_strategy + " Also, schedule a free technical check-up."
-            else:
-                return base_strategy
-
-        churning_customers['retention_strategy'] = churning_customers.apply(get_retention_strategy, axis=1)
-        
+        # The retention_strategy is now pre-computed in the CSV, so we just display it.
         st.dataframe(churning_customers[['customerID', 'clv', 'clv_tier', 'churn_probability', 'retention_strategy']])
 
 except FileNotFoundError:
@@ -101,6 +82,10 @@ with st.form(key='prediction_form'):
 
 # --- 4. DISPLAY PREDICTION RESULTS ---
 if submit_button:
+    # Add the parent directory to the Python path to allow imports
+    sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+    from retention_strategy import get_retention_strategies
+
     # Prepare the data in the format the API expects
     customer_data = {
         "gender": gender, "SeniorCitizen": SeniorCitizen, "Partner": Partner,
@@ -131,10 +116,16 @@ if submit_button:
         else:
             st.success(f"This customer is likely to STAY with a probability of {1-churn_prob:.2%}.")
             
-        st.subheader("Top Churn Drivers")
-        st.info("These are the top 3 factors influencing the prediction:")
-        for driver in result['top_churn_drivers']:
-            st.write(f"- {driver.replace('_', ' ').title()}")
+        st.subheader("Recommended Retention Strategies")
+        st.info("Based on the key drivers, here are some recommended actions:")
+
+        # Add premium services count for more detailed strategies
+        premium_services = ['OnlineSecurity', 'OnlineBackup', 'DeviceProtection', 'TechSupport']
+        customer_data['premium_services_count'] = sum(1 for service in premium_services if customer_data[service] == 'Yes')
+        
+        strategies = get_retention_strategies(customer_data, result['top_churn_drivers'])
+        for i, strategy in enumerate(strategies, 1):
+            st.write(f"**{i}.** {strategy}")
 
     except requests.exceptions.RequestException as e:
         st.error(f"Could not connect to the API. Please ensure the FastAPI server is running. Error: {e}")

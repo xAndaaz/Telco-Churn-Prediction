@@ -59,6 +59,9 @@ def get_predictions_and_explanations(df):
     return results
 
 if __name__ == '__main__':
+    # Import the strategy generator
+    from retention_strategy import get_retention_strategies
+
     # Load sample data
     sample_df = pd.read_csv('Dataset/sample_test.csv')
     
@@ -68,11 +71,29 @@ if __name__ == '__main__':
     # Calculate CLV and CLV tier for the results dataframe
     assumed_acquisition_cost = 100
     prediction_results['clv'] = (prediction_results['MonthlyCharges'] * prediction_results['tenure']) - assumed_acquisition_cost
-    prediction_results['clv_tier'] = pd.qcut(prediction_results['clv'], q=3, labels=['Low', 'Medium', 'High'])
+    
+    # Use pd.cut with defined bins to handle potential duplicate edges
+    _, clv_bins = pd.qcut(prediction_results['clv'], q=3, labels=['Low', 'Medium', 'High'], retbins=True, duplicates='drop')
+    prediction_results['clv_tier'] = pd.cut(prediction_results['clv'], bins=clv_bins, labels=['Low', 'Medium', 'High'], include_lowest=True)
+
+    # Generate retention strategies for customers predicted to churn
+    churning_customers = prediction_results[prediction_results['churn_prediction'] == 1].copy()
+    
+    if not churning_customers.empty:
+        strategies = []
+        for _, row in churning_customers.iterrows():
+            customer_data = row.to_dict()
+            # The get_retention_strategies function expects a list of drivers
+            drivers = row['top_churn_drivers']
+            strategy = get_retention_strategies(customer_data, drivers)
+            # Join list of strategies into a single string for the CSV
+            strategies.append(" | ".join(strategy))
+        
+        prediction_results.loc[prediction_results['churn_prediction'] == 1, 'retention_strategy'] = strategies
 
     # Save the results to a CSV file
     prediction_results.to_csv('Dataset/retention_candidates.csv', index=False)
 
     # Display results
-    print("Churn Predictions and Top Drivers:")
-    print(prediction_results[['customerID', 'clv', 'clv_tier', 'churn_prediction', 'churn_probability', 'top_churn_drivers']])
+    print("Churn Predictions, Drivers, and Strategies:")
+    print(prediction_results[['customerID', 'clv', 'clv_tier', 'churn_prediction', 'churn_probability', 'top_churn_drivers', 'retention_strategy']])
