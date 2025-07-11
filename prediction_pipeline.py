@@ -1,21 +1,39 @@
-
 import pandas as pd
 import pickle
 import shap
+from retention_strategy import get_retention_strategies
 
-# Load the trained model and training columns
-with open('Models/model.pkl', 'rb') as f:
-    model = pickle.load(f)
-with open('Models/training_columns.pkl', 'rb') as f:
-    training_columns = pickle.load(f)
+# --- 1. LOAD MODELS AND COLUMNS (Load once to be used by functions) ---
+try:
+    with open('Models/model.pkl', 'rb') as f:
+        model = pickle.load(f)
+    with open('Models/training_columns.pkl', 'rb') as f:
+        training_columns = pickle.load(f)
+    with open('Models/clv_bins.pkl', 'rb') as f:
+        clv_bins = pickle.load(f)
+except FileNotFoundError as e:
+    print(f"Error loading model files: {e}")
+    print("Please ensure you have run the `train_model.py` script to generate the necessary model files.")
+    # Exit if models can't be loaded, as the script is unusable.
+    exit()
+
+# --- 2. CORE LOGIC FUNCTIONS ---
 
 def prepare_data_for_prediction(df):
-    """Prepares raw data for prediction."""
+    """Prepares raw data for prediction by applying transformations from training."""
     
+    # Ensure required columns exist before calculations
+    required_cols = ['MonthlyCharges', 'tenure', 'OnlineSecurity', 'OnlineBackup', 'DeviceProtection', 'TechSupport']
+    for col in required_cols:
+        if col not in df.columns:
+            raise ValueError(f"Missing required column in uploaded CSV: {col}")
+
     # Use the same CLV calculation as in training
     assumed_acquisition_cost = 100
     df['clv'] = (df['MonthlyCharges'] * df['tenure']) - assumed_acquisition_cost
-    df['clv_tier'] = pd.qcut(df['clv'], q=3, labels=['Low', 'Medium', 'High'])
+    
+    # Use the pre-calculated bins from training to categorize CLV
+    df['clv_tier'] = pd.cut(df['clv'], bins=clv_bins, labels=['Low', 'Medium', 'High'], include_lowest=True)
     
     # Recreate the same engineered features
     df['tenure_monthly_interaction'] = df['tenure'] * df['MonthlyCharges']
@@ -32,8 +50,16 @@ def prepare_data_for_prediction(df):
     
     return df_aligned
 
-def get_predictions_and_explanations(df):
-    """Get predictions and SHAP explanations for the input data."""
+def run_prediction_pipeline(df):
+    """
+    Runs the full prediction and explanation pipeline on a dataframe.
+    
+    Args:
+        df (pd.DataFrame): A dataframe with customer data.
+        
+    Returns:
+        pd.DataFrame: The original dataframe with added columns for predictions and strategies.
+    """
     
     # Prepare the data
     df_prepared = prepare_data_for_prediction(df.copy())
@@ -42,58 +68,55 @@ def get_predictions_and_explanations(df):
     predictions = model.predict(df_prepared)
     probabilities = model.predict_proba(df_prepared)[:, 1]
     
-    # Get SHAP explanations
+    # Get SHAP explanations for top drivers
     explainer = shap.TreeExplainer(model)
     shap_values = explainer.shap_values(df_prepared)
+    shap_df = pd.DataFrame(shap_values, columns=df_prepared.columns)
+    top_features = shap_df.abs().apply(lambda x: x.nlargest(3).index.tolist(), axis=1)
     
     # Combine results into a single DataFrame
     results = df.copy()
     results['churn_prediction'] = predictions
     results['churn_probability'] = probabilities
-    
-    # Get top 3 features for each prediction
-    shap_df = pd.DataFrame(shap_values, columns=df_prepared.columns)
-    top_features = shap_df.abs().apply(lambda x: x.nlargest(3).index.tolist(), axis=1)
     results['top_churn_drivers'] = top_features
+    
+    # Generate retention strategies for customers predicted to churn
+    churning_customers_mask = results['churn_prediction'] == 1
+    if churning_customers_mask.any():
+        strategies = []
+        for _, row in results[churning_customers_mask].iterrows():
+            customer_data = row.to_dict()
+            drivers = row['top_churn_drivers']
+            strategy = get_retention_strategies(customer_data, drivers)
+            strategies.append(" | ".join(strategy))
+        
+        results.loc[churning_customers_mask, 'retention_strategy'] = strategies
+    
+    # Fill strategy for non-churners
+    results['retention_strategy'].fillna("No action needed", inplace=True)
     
     return results
 
+# --- 3. SCRIPT EXECUTION (for command-line use) ---
+
 if __name__ == '__main__':
-    # Import the strategy generator
-    from retention_strategy import get_retention_strategies
-
+    print("Running prediction pipeline on 'Dataset/sample_test.csv'...")
+    
     # Load sample data
-    sample_df = pd.read_csv('Dataset/sample_test.csv')
+    try:
+        sample_df = pd.read_csv('Dataset/sample_test.csv')
+    except FileNotFoundError:
+        print("Error: 'Dataset/sample_test.csv' not found. Cannot run the pipeline.")
+        exit()
     
-    # Get predictions and explanations
-    prediction_results = get_predictions_and_explanations(sample_df)
+    # Run the pipeline
+    prediction_results = run_prediction_pipeline(sample_df)
     
-    # Calculate CLV and CLV tier for the results dataframe
-    assumed_acquisition_cost = 100
-    prediction_results['clv'] = (prediction_results['MonthlyCharges'] * prediction_results['tenure']) - assumed_acquisition_cost
-    
-    # Use pd.cut with defined bins to handle potential duplicate edges
-    _, clv_bins = pd.qcut(prediction_results['clv'], q=3, labels=['Low', 'Medium', 'High'], retbins=True, duplicates='drop')
-    prediction_results['clv_tier'] = pd.cut(prediction_results['clv'], bins=clv_bins, labels=['Low', 'Medium', 'High'], include_lowest=True)
-
-    # Generate retention strategies for customers predicted to churn
-    churning_customers = prediction_results[prediction_results['churn_prediction'] == 1].copy()
-    
-    if not churning_customers.empty:
-        strategies = []
-        for _, row in churning_customers.iterrows():
-            customer_data = row.to_dict()
-            # The get_retention_strategies function expects a list of drivers
-            drivers = row['top_churn_drivers']
-            strategy = get_retention_strategies(customer_data, drivers)
-            # Join list of strategies into a single string for the CSV
-            strategies.append(" | ".join(strategy))
-        
-        prediction_results.loc[prediction_results['churn_prediction'] == 1, 'retention_strategy'] = strategies
-
     # Save the results to a CSV file
-    prediction_results.to_csv('Dataset/retention_candidates.csv', index=False)
+    output_path = 'Dataset/retention_candidates.csv'
+    prediction_results.to_csv(output_path, index=False)
 
-    # Display results
-    print("Churn Predictions, Drivers, and Strategies:")
-    print(prediction_results[['customerID', 'clv', 'clv_tier', 'churn_prediction', 'churn_probability', 'top_churn_drivers', 'retention_strategy']])
+    print(f"Pipeline complete. Results saved to '{output_path}'")
+    print("\n--- Sample of Results ---")
+    print(prediction_results[['customerID', 'churn_prediction', 'churn_probability', 'retention_strategy']].head())
+    print("\n")

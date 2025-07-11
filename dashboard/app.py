@@ -16,34 +16,48 @@ st.set_page_config(
 st.title("Churn Prediction and Retention Dashboard")
 st.markdown("This dashboard provides insights into customer churn predictions and helps generate retention strategies.")
 
-# --- 2. RETENTION CANDIDATES OVERVIEW ---
-st.header("Retention Candidates Overview")
-st.markdown("These are the customers identified as high-risk for churning. The table shows their churn probability, Customer Lifetime Value (CLV), and the recommended retention strategy.")
+# --- 3. BATCH PREDICTION FROM CSV ---
+st.header("Batch Prediction from CSV")
+st.markdown("Upload a CSV file with customer data to get predictions and retention strategies for the entire list.")
 
-try:
-    paths = ['../Dataset/retention_candidates.csv', 'Dataset/retention_candidates.csv']
+# Import pipeline functions here to avoid running them on every page load
+from prediction_pipeline import run_prediction_pipeline
 
-    for path in paths:
-        if os.path.exists(path):
-         retention_df = pd.read_csv(path)
-         break
+uploaded_file = st.file_uploader("Choose a CSV file", type="csv")
 
-    churning_customers = retention_df[retention_df['churn_prediction'] == 1].copy()
+if uploaded_file is not None:
+    with st.spinner('Processing customer list... This may take a moment.'):
+        try:
+            input_df = pd.read_csv(uploaded_file)
+            
+            # Run the full pipeline
+            results_df = run_prediction_pipeline(input_df)
+            
+            st.success("Processing complete!")
+            
+            st.subheader("Prediction Results")
+            st.dataframe(results_df)
+            
+            # Provide a download button for the results
+            @st.cache_data
+            def convert_df_to_csv(df):
+                return df.to_csv(index=False).encode('utf-8')
 
-    if churning_customers.empty:
-        st.warning("No customers are currently predicted to churn. Great news!")
-    else:
-        # The retention_strategy is now pre-computed in the CSV, so we just display it.
-        st.dataframe(churning_customers[['customerID', 'clv', 'clv_tier', 'churn_probability', 'retention_strategy']])
+            csv_output = convert_df_to_csv(results_df)
+            
+            st.download_button(
+                label="Download Results as CSV",
+                data=csv_output,
+                file_name='retention_candidates_output.csv',
+                mime='text/csv',
+            )
+            
+        except Exception as e:
+            st.error(f"An error occurred during processing: {e}")
 
-except FileNotFoundError:
-    st.error("The `retention_candidates.csv` file was not found. Please run the prediction pipeline first.")
-except Exception as e:
-    st.error(f"An error occurred while loading the retention data: {e}")
 
-
-# --- 3. REAL-TIME CHURN PREDICTION ---
-st.header("Real-time Churn Prediction")
+# --- 4. REAL-TIME CHURN PREDICTION ---
+st.header("Real-time Single Prediction")
 st.markdown("Enter a new customer's details below to get an instant churn prediction from the API.")
 
 # Create a form for user input
