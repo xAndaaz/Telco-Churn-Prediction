@@ -21,6 +21,8 @@ st.header("Batch Prediction from CSV")
 st.markdown("Upload a CSV file with customer data to get predictions and retention strategies for the entire list.")
 
 # Import pipeline functions here to avoid running them on every page load
+# Ensure the parent directory is in sys.path for local imports
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from prediction_pipeline import run_prediction_pipeline
 
 uploaded_file = st.file_uploader("Choose a CSV file", type="csv")
@@ -35,10 +37,24 @@ if uploaded_file is not None:
             
             st.success("Processing complete!")
             
-            st.subheader("Prediction Results")
-            st.dataframe(results_df)
+            # --- Display Summary Metrics ---
+            total_customers = len(results_df)
+            churner_count = results_df['churn_prediction'].sum()
+            st.metric(label="Total Customers Processed", value=total_customers)
+            st.metric(label="At-Risk Customers Identified", value=churner_count)
             
-            # Provide a download button for the results
+            st.subheader("Prediction Results")
+            st.markdown("The table below shows the key results. Use the download button for the full dataset.")
+
+            # --- Create a focused view for the dashboard ---
+            # Check for customerID, as it might not be in every uploaded file
+            display_columns = ['churn_prediction', 'churn_probability', 'retention_strategy', 'top_churn_drivers']
+            if 'customerID' in results_df.columns:
+                display_columns.insert(0, 'customerID')
+
+            st.dataframe(results_df[display_columns])
+            
+            # --- Provide a download button for the FULL results ---
             @st.cache_data
             def convert_df_to_csv(df):
                 return df.to_csv(index=False).encode('utf-8')
@@ -46,7 +62,7 @@ if uploaded_file is not None:
             csv_output = convert_df_to_csv(results_df)
             
             st.download_button(
-                label="Download Results as CSV",
+                label="Download Full Results as CSV",
                 data=csv_output,
                 file_name='retention_candidates_output.csv',
                 mime='text/csv',
