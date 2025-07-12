@@ -62,7 +62,7 @@ def get_retention_strategies(customer_data, churn_drivers):
         """Generates strategy for high monthly charges."""
         if driver == "MonthlyCharges":
             strategies.append(
-                f"**Strategy for High Bill:** The monthly charge of ${customer_data['MonthlyCharges']:.2f} is a key factor. "
+                f"**Strategy for High Bill:** The monthly charge of ₹{customer_data['MonthlyCharges']:.2f} is a key factor. "
                 "Review their plan for potential cost-saving opportunities, offer a promotional discount for a few months, "
                 "or bundle services to provide more value at a similar price point."
             )

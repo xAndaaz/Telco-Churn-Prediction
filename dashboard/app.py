@@ -55,7 +55,7 @@ if uploaded_file is not None:
             st.dataframe(results_df[display_columns])
             
             # --- Provide a download button for the FULL results ---
-            @st.cache_data
+            
             def convert_df_to_csv(df):
                 return df.to_csv(index=False).encode('utf-8')
 
@@ -89,7 +89,7 @@ with st.form(key='prediction_form'):
         PhoneService = st.selectbox("Phone Service", ["Yes", "No"])
         StreamingTV = st.selectbox("Streaming TV", ["Yes", "No", "No internet service"])
         Contract = st.selectbox("Contract", ["Month-to-month", "One year", "Two year"])
-        MonthlyCharges = st.number_input("Monthly Charges", min_value=0.0, value=70.0, step=1.0)
+        MonthlyCharges = st.number_input("Monthly Charges", min_value=0.0, value=120.0, step=1.0)
 
     with col2:
         SeniorCitizen = st.selectbox("Senior Citizen", [0, 1], format_func=lambda x: "Yes" if x == 1 else "No")
@@ -97,11 +97,11 @@ with st.form(key='prediction_form'):
         MultipleLines = st.selectbox("Multiple Lines", ["Yes", "No", "No phone service"])
         StreamingMovies = st.selectbox("Streaming Movies", ["Yes", "No", "No internet service"])
         PaperlessBilling = st.selectbox("Paperless Billing", ["Yes", "No"])
-        TotalCharges = st.number_input("Total Charges", min_value=0.0, value=1400.0, step=10.0)
+        TotalCharges = st.number_input("Total Charges", min_value=0.0, value=240.0, step=10.0)
 
     with col3:
-        tenure = st.slider("Tenure (months)", 1, 72, 24)
-        InternetService = st.selectbox("Internet Service", ["DSL", "Fiber optic", "No"])
+        tenure = st.slider("Tenure (months)", 1, 72, 2)
+        InternetService = st.selectbox("Internet Service", ["Fiber optic", "DSL",  "No"])
         OnlineSecurity = st.selectbox("Online Security", ["Yes", "No", "No internet service"])
         OnlineBackup = st.selectbox("Online Backup", ["Yes", "No", "No internet service"])
         DeviceProtection = st.selectbox("Device Protection", ["Yes", "No", "No internet service"])
