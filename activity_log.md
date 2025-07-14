@@ -18,7 +18,10 @@ This file logs the steps taken to improve the churn prediction model, the reason
 
 ### Execution Log
 
-*   **Next Step (Paused):** Started to implement enhanced feature engineering in `train_model.py`.
-*   **User Interruption:** User requested the creation of this activity log to track progress and thinking.
-*   **New Instruction:** User requested that all significant changes be committed to Git. I will now commit after each major step.
-*   **Current Action:** Updating this log and preparing to check the Git status before proceeding.
+*   **User Instruction:** User requested a more granular, step-by-step approach with approval before each change.
+*   **User Instruction:** User requested that all significant changes be committed to Git.
+*   **Action:** Checked Git status, added `activity_log.md`, and committed it to establish a baseline.
+*   **Feature Proposal:** Proposed three new features (`tenure_per_premium_service`, `has_dependents_or_partner`, `digital_engagement_score`) in a table format.
+*   **User Feedback:** User noted that the table format was unreadable in the CLI and requested a linear list format.
+*   **Feature Approval:** User approved adding **only** the `tenure_per_premium_service` feature and rejected the other two.
+*   **Next Action:** Update the `train_model.py` and `data_processing.py` scripts to include the new feature.

@@ -44,6 +44,7 @@ def prepare_data_for_prediction(df: pd.DataFrame) -> pd.DataFrame:
     premium_services = ['OnlineSecurity', 'OnlineBackup', 'DeviceProtection', 'TechSupport']
     df['premium_services_count'] = df[premium_services].apply(lambda x: (x == 'Yes').sum(), axis=1)
     df['tenure_monthly_ratio'] = df['tenure'] / (df['MonthlyCharges'] + 1e-6)
+    df['tenure_per_premium_service'] = df['tenure'] / (df['premium_services_count'] + 1e-6)
     
     # One-hot encode categorical features
     categorical_cols = df.select_dtypes(include=['object', 'category']).columns

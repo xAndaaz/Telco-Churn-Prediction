@@ -32,6 +32,9 @@ df['premium_services_count'] = df[premium_services].apply(lambda x: (x == 'Yes')
 # Tenure to monthly charges ratio
 df['tenure_monthly_ratio'] = df['tenure'] / (df['MonthlyCharges'] + 1e-6)
 
+# Tenure per premium service
+df['tenure_per_premium_service'] = df['tenure'] / (df['premium_services_count'] + 1e-6)
+
 # One-hot encode categorical features, including the new clv_tier
 categorical_cols = df.select_dtypes(include=['object', 'category']).columns
 df_encoded = pd.get_dummies(df, columns=categorical_cols, drop_first=True)
