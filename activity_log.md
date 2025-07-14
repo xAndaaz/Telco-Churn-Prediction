@@ -36,3 +36,6 @@ This file logs the steps taken to improve the churn prediction model, the reason
 *   **User Decision:** User approved the plan, noting this was the original intent for the `clv_tier` feature.
 *   **Bug Identified:** Discovered that the `clv_tier` is not being passed to the `get_retention_strategies` function in the prediction pipeline.
 *   **Current Action:** Plan to fix the bug in `prediction_pipeline.py` before implementing the new strategy logic.
+*   **Action:** Fixed the bug and implemented value-based retention strategies in `retention_strategy.py`.
+*   **Next Step Proposal:** Improve project structure by adding a `config.yaml` and unit tests.
+*   **User Decision:** User has decided to skip the project structure improvements.

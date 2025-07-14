@@ -93,6 +93,7 @@ print("Best hyperparameters found:")
 for key, value in study.best_params.items():
     print(f"  {key}: {value}")
 #best_params= {'n_estimators': 1015, 'max_depth': 8, 'learning_rate': 0.010749966721711619, 'subsample': 0.7538033573276144, 'colsample_bytree': 0.754614993636156, 'gamma': 9.192659488189232, 'min_child_weight': 2}
+#best_params= {'n_estimators': 683, 'max_depth': 4, 'learning_rate': 0.012163191276554509, 'subsample': 0.5979871826927111, 'colsample_bytree': 0.786253950258694, 'gamma': 7.722044860106266, 'min_child_weight': 4}
 
 # 7. Train Final Model with Best Hyperparameters
 print("\nTraining final model with best hyperparameters...")
