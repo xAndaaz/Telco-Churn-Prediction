@@ -1,5 +1,6 @@
 
 """
+This muodule can be setup with marketing teams to generate actionable retention strategies
 This module provides functions to generate actionable retention strategies
 based on customer data and model-driven churn drivers.
 """
@@ -23,26 +24,32 @@ def get_retention_strategies(customer_data, churn_drivers):
     # This approach allows for more complex, conditional logic for each driver.
 
     def handle_contract(driver):
-        """Generates strategy based on the customer's actual contract type."""
+        """Generates strategy based on the customer's actual contract type and CLV tier."""
         if "Contract" in driver:
             actual_contract = customer_data.get('Contract')
+            clv_tier = customer_data.get('clv_tier')
+
             if actual_contract == 'Month-to-month':
-                strategies.append(
-                    "**Strategy for Contract:** This customer is on a flexible Month-to-Month plan, which makes it easy to churn. "
-                    "Offer a significant discount for switching to a one-year or two-year contract to increase "
-                    "their long-term commitment and provide price stability."
-                )
+                if clv_tier == 'High':
+                    strategies.append(
+                        "**Strategy for Contract (High Value):** This is a high-value, month-to-month customer. Offer a significant discount (e.g., 20-25%) for switching to a one or two-year contract. Emphasize the price stability and long-term savings."
+                    )
+                elif clv_tier == 'Medium':
+                    strategies.append(
+                        "**Strategy for Contract (Medium Value):** This customer is on a flexible plan. Offer a moderate discount (e.g., 10-15%) for a one-year contract to increase commitment."
+                    )
+                else: # Low value
+                    strategies.append(
+                        "**Strategy for Contract (Low Value):** This customer is on a flexible plan. Offer a small incentive, like a single free month of a premium service, for signing a one-year contract."
+                    )
+
             elif actual_contract == 'One year':
                 strategies.append(
-                    "**Strategy for Contract:** This customer is on a One-Year contract but is still flagged as a churn risk. "
-                    "If their tenure is approaching 12, 24, or 36 months, proactively offer a renewal with a loyalty discount. "
-                    "Otherwise, this may indicate dissatisfaction with the service itself."
+                    "**Strategy for Contract:** This customer is on a One-Year contract but is still flagged as a churn risk. Proactively offer a renewal with a loyalty discount, especially if their tenure is approaching a renewal period."
                 )
             elif actual_contract == 'Two year':
                 strategies.append(
-                    "**High-Priority Alert:** This customer is on a Two-Year contract, which is unusual for a churn risk. "
-                    "This indicates a potentially high-value customer is deeply unhappy. A personal call from a "
-                    "senior retention specialist is highly recommended to understand and resolve their issues immediately."
+                    "**High-Priority Alert:** This customer is on a Two-Year contract, which is unusual for a churn risk. This indicates a potentially high-value customer is deeply unhappy. A personal call from a senior retention specialist is highly recommended to understand and resolve their issues immediately."
                 )
             return True
         return False
@@ -59,13 +66,21 @@ def get_retention_strategies(customer_data, churn_drivers):
         return False
 
     def handle_monthly_charges(driver):
-        """Generates strategy for high monthly charges."""
+        """Generates strategy for high monthly charges based on CLV tier."""
         if driver == "MonthlyCharges":
-            strategies.append(
-                f"**Strategy for High Bill:** The monthly charge of ₹{customer_data['MonthlyCharges']:.2f} is a key factor. "
-                "Review their plan for potential cost-saving opportunities, offer a promotional discount for a few months, "
-                "or bundle services to provide more value at a similar price point."
-            )
+            clv_tier = customer_data.get('clv_tier')
+            if clv_tier == 'High':
+                strategies.append(
+                    f"**Strategy for High Bill (High Value):** The monthly charge of ₹{customer_data['MonthlyCharges']:.2f} is a key factor. This is a high-value customer, so consider a significant, permanent plan adjustment or a bundle with more services for the same price."
+                )
+            elif clv_tier == 'Medium':
+                strategies.append(
+                    f"**Strategy for High Bill (Medium Value):** The monthly charge of ₹{customer_data['MonthlyCharges']:.2f} is a factor. Offer a promotional discount for a few months or a free premium service to add value."
+                )
+            else: # Low value
+                strategies.append(
+                    f"**Strategy for High Bill (Low Value):** The monthly charge of ₹{customer_data['MonthlyCharges']:.2f} is a factor. Offer a small, one-time bill credit or a free month of a basic service."
+                )
             return True
         return False
 

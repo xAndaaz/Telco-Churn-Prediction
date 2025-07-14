@@ -50,8 +50,11 @@ def run_prediction_pipeline(df):
     churning_customers_mask = results['churn_prediction'] == 1
     if churning_customers_mask.any():
         strategies = []
+        # Pass the prepared data with the CLV tier to the retention strategy function
         for _, row in results[churning_customers_mask].iterrows():
             customer_data = row.to_dict()
+            # Get the CLV tier from the prepared data
+            customer_data['clv_tier'] = df_prepared.loc[row.name]['clv_tier']
             drivers = row['top_churn_drivers']
             strategy = get_retention_strategies(customer_data, drivers)
             strategies.append(" | ".join(strategy))

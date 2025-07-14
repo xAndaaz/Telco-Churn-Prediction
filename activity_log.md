@@ -31,3 +31,8 @@ This file logs the steps taken to improve the churn prediction model, the reason
 *   **Next Step Proposal:** Proposed integrating MLflow and activating Optuna.
 *   **User Decision:** User rejected MLflow integration but approved activating Optuna for hyperparameter tuning.
 *   **Next Action:** Modify `train_model.py` to activate Optuna and comment out the static `best_params`.
+*   **Action:** Activated Optuna and retrained the model to find new optimal hyperparameters.
+*   **Next Step Proposal:** Refine retention strategies to be value-based using the `clv_tier`.
+*   **User Decision:** User approved the plan, noting this was the original intent for the `clv_tier` feature.
+*   **Bug Identified:** Discovered that the `clv_tier` is not being passed to the `get_retention_strategies` function in the prediction pipeline.
+*   **Current Action:** Plan to fix the bug in `prediction_pipeline.py` before implementing the new strategy logic.
