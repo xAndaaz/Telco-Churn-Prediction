@@ -25,3 +25,9 @@ This file logs the steps taken to improve the churn prediction model, the reason
 *   **User Feedback:** User noted that the table format was unreadable in the CLI and requested a linear list format.
 *   **Feature Approval:** User approved adding **only** the `tenure_per_premium_service` feature and rejected the other two.
 *   **Next Action:** Update the `train_model.py` and `data_processing.py` scripts to include the new feature.
+*   **Action:** Added the `tenure_per_premium_service` feature to both scripts and committed the changes.
+*   **Action:** Retrained the model by executing the `train_model.py` script within the virtual environment.
+*   **Observation:** The model trained successfully, but the lack of historical metrics makes it difficult to assess the impact of the new feature. This reinforces the need for experiment tracking.
+*   **Next Step Proposal:** Proposed integrating MLflow and activating Optuna.
+*   **User Decision:** User rejected MLflow integration but approved activating Optuna for hyperparameter tuning.
+*   **Next Action:** Modify `train_model.py` to activate Optuna and comment out the static `best_params`.

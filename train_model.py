@@ -85,18 +85,18 @@ def objective(trial):
     return np.mean(f1_scores)
 
 # print("Starting hyperparameter optimization with Optuna (100 trials, 5-fold CV)...")
-# study = optuna.create_study(direction='maximize')
-# study.optimize(objective, n_trials=300)
+study = optuna.create_study(direction='maximize')
+study.optimize(objective, n_trials=300)
 
-# print(f"Best trial F1-score (CV): {study.best_value}")
-# print("Best hyperparameters found:")
-# for key, value in study.best_params.items():
-#     print(f"  {key}: {value}")
-best_params= {'n_estimators': 1015, 'max_depth': 8, 'learning_rate': 0.010749966721711619, 'subsample': 0.7538033573276144, 'colsample_bytree': 0.754614993636156, 'gamma': 9.192659488189232, 'min_child_weight': 2}
+print(f"Best trial F1-score (CV): {study.best_value}")
+print("Best hyperparameters found:")
+for key, value in study.best_params.items():
+    print(f"  {key}: {value}")
+#best_params= {'n_estimators': 1015, 'max_depth': 8, 'learning_rate': 0.010749966721711619, 'subsample': 0.7538033573276144, 'colsample_bytree': 0.754614993636156, 'gamma': 9.192659488189232, 'min_child_weight': 2}
 
 # 7. Train Final Model with Best Hyperparameters
 print("\nTraining final model with best hyperparameters...")
-#best_params = study.best_params
+best_params = study.best_params
 final_model = XGBClassifier(
     **best_params,
     objective='binary:logistic',
