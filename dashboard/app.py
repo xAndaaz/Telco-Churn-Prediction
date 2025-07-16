@@ -24,6 +24,9 @@ st.markdown("Upload a CSV file with customer data to get predictions and retenti
 # Ensure the parent directory is in sys.path for local imports
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from prediction_pipeline import run_prediction_pipeline
+from survival_prediction_pipeline import run_survival_prediction_pipeline
+from survival_retention_strategy import generate_survival_retention_strategies
+
 
 uploaded_file = st.file_uploader("Choose a CSV file", type="csv")
 
@@ -70,6 +73,40 @@ if uploaded_file is not None:
             
         except Exception as e:
             st.error(f"An error occurred during processing: {e}")
+
+# --- NEW: SURVIVAL ANALYSIS SECTION ---
+st.header("Survival Analysis & Time-Based Retention")
+st.markdown("Run the survival analysis pipeline on the sample data to generate time-sensitive retention strategies.")
+
+if st.button("Run Survival Analysis on Sample Data"):
+    with st.spinner("Running survival analysis... This may take a few moments."):
+        try:
+            # Run the prediction pipeline
+            survival_predictions_path = run_survival_prediction_pipeline()
+            
+            if survival_predictions_path:
+                # Load the predictions and generate strategies
+                predictions_df = pd.read_csv(survival_predictions_path)
+                retention_plan_df = generate_survival_retention_strategies(predictions_df)
+                
+                st.success("Survival analysis complete!")
+                
+                st.subheader("Time-Based Retention Plan")
+                st.markdown("The table below shows the recommended retention strategy based on churn risk over time.")
+                
+                # Display the results
+                st.dataframe(retention_plan_df[['customerID', 'retention_strategy']])
+                
+                # Provide a download button for the survival retention plan
+                csv_output_survival = convert_df_to_csv(retention_plan_df)
+                st.download_button(
+                    label="Download Survival Retention Plan as CSV",
+                    data=csv_output_survival,
+                    file_name='survival_retention_plan.csv',
+                    mime='text/csv',
+                )
+        except Exception as e:
+            st.error(f"An error occurred during survival analysis: {e}")
 
 
 # --- 4. REAL-TIME CHURN PREDICTION ---
