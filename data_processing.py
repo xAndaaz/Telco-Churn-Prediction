@@ -13,10 +13,11 @@ except FileNotFoundError:
     clv_bins = None
 
 
-def prepare_data_for_prediction(df: pd.DataFrame) -> pd.DataFrame:
+def prepare_data_for_prediction(df: pd.DataFrame) -> (pd.DataFrame, pd.DataFrame):
     """
     Prepares raw customer data for prediction by applying the same transformations used in training.
     This is for the XGBoost classification model.
+    Returns two dataframes: one with the clv_tier for strategies, and one aligned for the model.
     """
     if clv_bins is None or training_columns is None:
         raise RuntimeError("CLV bins or training columns not loaded. Run 'train_model.py' first.")
@@ -36,12 +37,15 @@ def prepare_data_for_prediction(df: pd.DataFrame) -> pd.DataFrame:
     df['tenure_monthly_ratio'] = df['tenure'] / (df['MonthlyCharges'] + 1e-6)
     df['tenure_per_premium_service'] = df['tenure'] / (df['premium_services_count'] + 1e-6)
     
+    # Keep a copy of the data with the human-readable clv_tier before encoding
+    df_with_tiers = df.copy()
+
     categorical_cols = df.select_dtypes(include=['object', 'category']).columns
     df_encoded = pd.get_dummies(df, columns=categorical_cols, drop_first=True)
     
     df_aligned = df_encoded.reindex(columns=training_columns, fill_value=0)
     
-    return df_aligned
+    return df_aligned, df_with_tiers
 
 def prepare_data_for_survival(df: pd.DataFrame, is_training=False) -> pd.DataFrame:
     """

@@ -69,3 +69,7 @@ This file logs the steps taken to improve the churn prediction model, the reason
     *   **Observation:** I initially placed feature engineering logic directly in the training script, violating our project's principle of centralized data processing.
     *   **Action:** Proactively refactored the code. Created a `prepare_data_for_survival` function in `data_processing.py` and updated `train_survival_model.py` to use it.
     *   **User Feedback:** The user approved of this self-correction, noting it was an intelligent and valuable step. This reinforces our focus on the "Quality of Work" and "Adherence to Work" criteria.
+*   **Dashboard Integration & Design Decision:**
+    *   **Action:** Integrated the survival analysis workflow into the Streamlit dashboard, allowing users to run the pipeline and see time-based retention strategies.
+    *   **User Query:** The user asked why we have two separate retention strategies and if they should be merged.
+    *   **Decision:** We decided to keep the two strategies separate. This is a key design choice. It allows us to showcase two distinct, powerful methodologies: one based on *why* a customer churns (XGBoost + SHAP) and one based on *when* they will churn (Survival Analysis). This demonstrates a deeper level of analysis and problem-solving.

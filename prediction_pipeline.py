@@ -28,7 +28,7 @@ def run_prediction_pipeline(df):
     """
     
     # Prepare the data
-    df_prepared = prepare_data_for_prediction(df.copy())
+    df_prepared, df_with_tiers = prepare_data_for_prediction(df.copy())
     
     # Get predictions
     predictions = model.predict(df_prepared)
@@ -45,20 +45,16 @@ def run_prediction_pipeline(df):
     results['churn_prediction'] = predictions
     results['churn_probability'] = probabilities
     results['top_churn_drivers'] = top_features
-    
+    # Add the clv_tier from the intermediate dataframe
+    results['clv_tier'] = df_with_tiers['clv_tier']
+
     # Generate retention strategies for customers predicted to churn
     churning_customers_mask = results['churn_prediction'] == 1
     if churning_customers_mask.any():
-        strategies = []
-        # Pass the prepared data with the CLV tier to the retention strategy function
-        for _, row in results[churning_customers_mask].iterrows():
-            customer_data = row.to_dict()
-            # Get the CLV tier from the prepared data
-            customer_data['clv_tier'] = df_prepared.loc[row.name]['clv_tier']
-            drivers = row['top_churn_drivers']
-            strategy = get_retention_strategies(customer_data, drivers)
-            strategies.append(" | ".join(strategy))
-        
+        strategies = results[churning_customers_mask].apply(
+            lambda row: " | ".join(get_retention_strategies(row.to_dict(), row['top_churn_drivers'])),
+            axis=1
+        )
         results.loc[churning_customers_mask, 'retention_strategy'] = strategies
     
     # Fill strategy for non-churners
