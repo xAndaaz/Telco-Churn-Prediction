@@ -7,38 +7,67 @@ try:
         training_columns = pickle.load(f)
     with open('Models/clv_bins.pkl', 'rb') as f:
         clv_bins = pickle.load(f)
-except FileNotFoundError as e:
-    print(f"Error loading model files in data_processing.py: {e}")
-    print("Please ensure 'train_model.py' has been run successfully.")
-    # Propagate the error to prevent the application from running with missing files
-    raise
+except FileNotFoundError:
+    # This is not an error if we are just training the survival model, so we can pass.
+    training_columns = None
+    clv_bins = None
+
 
 def prepare_data_for_prediction(df: pd.DataFrame) -> pd.DataFrame:
     """
     Prepares raw customer data for prediction by applying the same transformations used in training.
-
-    This function centralizes the feature engineering logic. It includes validation to ensure
-    that the input DataFrame has the necessary columns for processing.
-
-    Args:
-        df (pd.DataFrame): The input DataFrame with raw customer data.
-
-    Returns:
-        pd.DataFrame: A DataFrame with features engineered, encoded, and aligned with the training data.
+    This is for the XGBoost classification model.
     """
-    # Ensure required columns exist before calculations
+    if clv_bins is None or training_columns is None:
+        raise RuntimeError("CLV bins or training columns not loaded. Run 'train_model.py' first.")
+
     required_cols = ['MonthlyCharges', 'tenure', 'OnlineSecurity', 'OnlineBackup', 'DeviceProtection', 'TechSupport']
     for col in required_cols:
         if col not in df.columns:
             raise ValueError(f"Missing required column in input data: {col}")
 
-    # Use the same CLV calculation as in training
+    assumed_acquisition_cost = 100
+    df['clv'] = (df['MonthlyCharges'] * df['tenure']) - assumed_acquisition_cost
+    df['clv_tier'] = pd.cut(df['clv'], bins=clv_bins, labels=['Low', 'Medium', 'High'], include_lowest=True)
+    
+    df['tenure_monthly_interaction'] = df['tenure'] * df['MonthlyCharges']
+    premium_services = ['OnlineSecurity', 'OnlineBackup', 'DeviceProtection', 'TechSupport']
+    df['premium_services_count'] = df[premium_services].apply(lambda x: (x == 'Yes').sum(), axis=1)
+    df['tenure_monthly_ratio'] = df['tenure'] / (df['MonthlyCharges'] + 1e-6)
+    df['tenure_per_premium_service'] = df['tenure'] / (df['premium_services_count'] + 1e-6)
+    
+    categorical_cols = df.select_dtypes(include=['object', 'category']).columns
+    df_encoded = pd.get_dummies(df, columns=categorical_cols, drop_first=True)
+    
+    df_aligned = df_encoded.reindex(columns=training_columns, fill_value=0)
+    
+    return df_aligned
+
+def prepare_data_for_survival(df: pd.DataFrame, is_training=False) -> pd.DataFrame:
+    """
+    Prepares raw customer data for survival analysis.
+    This is for the Cox Proportional Hazards model.
+    """
+    # For training, we need to generate the CLV bins. For prediction, we'd load them.
+    # For now, we'll keep it simple and recalculate, but this could be enhanced.
     assumed_acquisition_cost = 100
     df['clv'] = (df['MonthlyCharges'] * df['tenure']) - assumed_acquisition_cost
     
-    # Use the pre-calculated bins from training to categorize CLV
-    df['clv_tier'] = pd.cut(df['clv'], bins=clv_bins, labels=['Low', 'Medium', 'High'], include_lowest=True)
-    
+    if is_training:
+        _, clv_bins_survival = pd.qcut(df['clv'], q=3, labels=['Low', 'Medium', 'High'], retbins=True, duplicates='drop')
+        # In a real scenario, you'd save these bins like in the classification model
+    else:
+        # For prediction, you would load pre-saved bins. This is a placeholder.
+        # To make this runnable, we'll just use some default bins if not training.
+        # A more robust solution would be required for a true prediction pipeline.
+        clv_bins_survival = [df['clv'].min(), df['clv'].quantile(0.33), df['clv'].quantile(0.66), df['clv'].max()]
+
+    df['clv_tier'] = pd.cut(df['clv'], bins=clv_bins_survival, labels=['Low', 'Medium', 'High'], include_lowest=True)
+
+    # Map Churn to a binary indicator (1 for event, 0 for no event)
+    if 'Churn' in df.columns:
+        df['Churn'] = df['Churn'].replace({'No': 0, 'Yes': 1})
+
     # Recreate the same engineered features
     df['tenure_monthly_interaction'] = df['tenure'] * df['MonthlyCharges']
     premium_services = ['OnlineSecurity', 'OnlineBackup', 'DeviceProtection', 'TechSupport']
@@ -50,7 +79,11 @@ def prepare_data_for_prediction(df: pd.DataFrame) -> pd.DataFrame:
     categorical_cols = df.select_dtypes(include=['object', 'category']).columns
     df_encoded = pd.get_dummies(df, columns=categorical_cols, drop_first=True)
     
-    # Align columns with the training data
-    df_aligned = df_encoded.reindex(columns=training_columns, fill_value=0)
+    # Drop the raw CLV score as it's now represented by tiers
+    df_processed = df_encoded.drop(columns=['clv'], errors='ignore')
     
-    return df_aligned
+    # Ensure 'tenure' is greater than 0 for the model
+    if 'tenure' in df_processed.columns:
+        df_processed = df_processed[df_processed['tenure'] > 0]
+        
+    return df_processed
