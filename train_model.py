@@ -84,7 +84,7 @@ def objective(trial):
     
     return np.mean(f1_scores)
 
-# print("Starting hyperparameter optimization with Optuna (100 trials, 5-fold CV)...")
+# print("Starting hyperparameter optimization with Optuna (300 trials, 5-fold CV)...")
 study = optuna.create_study(direction='maximize')
 study.optimize(objective, n_trials=300)
 

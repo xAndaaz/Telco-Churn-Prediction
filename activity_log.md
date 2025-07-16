@@ -39,3 +39,29 @@ This file logs the steps taken to improve the churn prediction model, the reason
 *   **Action:** Fixed the bug and implemented value-based retention strategies in `retention_strategy.py`.
 *   **Next Step Proposal:** Improve project structure by adding a `config.yaml` and unit tests.
 *   **User Decision:** User has decided to skip the project structure improvements.
+
+---
+
+## 2025-07-15
+
+### Project Reframing & Strategic Goals
+
+*   **User Instruction:** The user has clarified the project's business context. This is an internship project being evaluated by their company.
+*   **Core Objective:** The primary goal is to demonstrate advanced data science skills to secure a positive evaluation.
+*   **Key Evaluation Criteria:**
+    1.  **Adherence to Work:** Following instructions and best practices.
+    2.  **Problem-Solving Ability:** Effectively diagnosing and solving complex problems.
+    3.  **Quality of Work:** Producing robust, reliable, and well-documented results.
+    4.  **Creativity and Innovation:** Applying novel techniques and thinking beyond the initial prompt.
+*   **Guideline Recap:** The initial guideline was to predict churn to enable proactive retention. Our goal is to significantly exceed this baseline.
+*   **Our Strategy:** All subsequent improvements will be framed to explicitly target one or more of these evaluation criteria. We will focus on identifying and closing the gaps between a standard academic project and a professional, production-ready data science solution.
+*   **User Feedback:** User requested to avoid table formats in responses as they are difficult to read in the CLI. Will use list formats going forward.
+
+### Survival Analysis Implementation
+
+*   **Decision:** We have decided to implement Survival Analysis to address the "Creativity & Innovation" criterion. This reframes the problem from *if* a customer will churn to *when*.
+*   **Plan:**
+    1.  Add `lifelines` to `requirements.txt`.
+    2.  Create a new script, `train_survival_model.py`, to avoid disrupting the current pipeline.
+    3.  Use the Cox Proportional Hazards model (`CoxPHFitter`) to predict churn risk over time.
+    4.  Save the new model as `survival_model.pkl`.
