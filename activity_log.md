@@ -73,3 +73,8 @@ This file logs the steps taken to improve the churn prediction model, the reason
     *   **Action:** Integrated the survival analysis workflow into the Streamlit dashboard, allowing users to run the pipeline and see time-based retention strategies.
     *   **User Query:** The user asked why we have two separate retention strategies and if they should be merged.
     *   **Decision:** We decided to keep the two strategies separate. This is a key design choice. It allows us to showcase two distinct, powerful methodologies: one based on *why* a customer churns (XGBoost + SHAP) and one based on *when* they will churn (Survival Analysis). This demonstrates a deeper level of analysis and problem-solving.
+*   **Bug Report & Fix:**
+    *   **User Report:** User identified a bug in the batch prediction dashboard feature (`'clv_tier'` error).
+    *   **Diagnosis:** The `clv_tier` column was being lost during one-hot encoding in the prediction pipeline.
+    *   **Action:** Fixed the bug by modifying `data_processing.py` to return the `clv_tier` data alongside the model-ready data, and updated `prediction_pipeline.py` to use it correctly. This demonstrates our problem-solving ability.
+*   **New Instruction:** User requested to refactor `survival_retention_strategy.py` for better code consistency, moving the file-saving logic into the `if __name__ == "__main__"` block.

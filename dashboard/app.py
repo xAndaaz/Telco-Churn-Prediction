@@ -81,12 +81,14 @@ st.markdown("Run the survival analysis pipeline on the sample data to generate t
 if st.button("Run Survival Analysis on Sample Data"):
     with st.spinner("Running survival analysis... This may take a few moments."):
         try:
-            # Run the prediction pipeline
-            survival_predictions_path = run_survival_prediction_pipeline()
+            # Load the sample data
+            sample_df = pd.read_csv('Dataset/sample_test.csv')
             
-            if survival_predictions_path:
-                # Load the predictions and generate strategies
-                predictions_df = pd.read_csv(survival_predictions_path)
+            # Run the prediction pipeline
+            predictions_df = run_survival_prediction_pipeline(sample_df)
+            
+            if predictions_df is not None:
+                # Generate strategies
                 retention_plan_df = generate_survival_retention_strategies(predictions_df)
                 
                 st.success("Survival analysis complete!")
@@ -105,6 +107,8 @@ if st.button("Run Survival Analysis on Sample Data"):
                     file_name='survival_retention_plan.csv',
                     mime='text/csv',
                 )
+        except FileNotFoundError:
+            st.error("Error: 'Dataset/sample_test.csv' not found. Cannot run the analysis.")
         except Exception as e:
             st.error(f"An error occurred during survival analysis: {e}")
 

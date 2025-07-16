@@ -56,14 +56,14 @@ if __name__ == "__main__":
     # Generate the strategies
     final_strategies_df = generate_survival_retention_strategies(predictions_data)
 
-    print("\nGenerated Retention Strategies:")
-    # Print the results to the console for review
-    for index, row in final_strategies_df.iterrows():
-        print(f"CustomerID: {row['customerID']}")
-        print(f"  - Strategy: {row['retention_strategy']}\n")
-
     # Save the final strategies to a new file
     output_path = 'Dataset/survival_retention_plan.csv'
     final_strategies_df.to_csv(output_path, index=False)
     print(f"Complete retention plan saved to {output_path}")
+
+    print("\n--- Sample of Results ---")
+    # Print the results to the console for review
+    for index, row in final_strategies_df.head().iterrows():
+        print(f"CustomerID: {row['customerID']}")
+        print(f"  - Strategy: {row['retention_strategy']}\n")
 
