@@ -5,37 +5,15 @@ import optuna
 from sklearn.model_selection import train_test_split, StratifiedKFold
 from sklearn.metrics import classification_report, roc_auc_score, confusion_matrix, f1_score, precision_recall_curve
 from xgboost import XGBClassifier
+from feature_engineering import engineer_features
 
 # 1. Load Dataset
 df = pd.read_csv(r'Dataset/newds.csv')
 
-# 2. Calculate Customer Lifetime Value (CLV)
-# For this portfolio project, we'll use a simplified CLV formula.
-# CLV = (customer['MonthlyCharges'] * customer['tenure']) - (assumed_acquisition_cost)
-assumed_acquisition_cost = 100
-df['clv'] = (df['MonthlyCharges'] * df['tenure']) - assumed_acquisition_cost
+# 2. Engineer Features
+df, clv_bins = engineer_features(df, is_training=True)
 
-# Segment customers into value tiers based on CLV
-_, clv_bins = pd.qcut(df['clv'], q=3, labels=['Low', 'Medium', 'High'], retbins=True, duplicates='drop')
-df['clv_tier'] = pd.cut(df['clv'], bins=clv_bins, labels=['Low', 'Medium', 'High'], include_lowest=True)
-
-# 3. Advanced Feature Engineering
-df['Churn'] = df['Churn'].replace({'No': 0, 'Yes': 1})
-
-# Interaction features
-df['tenure_monthly_interaction'] = df['tenure'] * df['MonthlyCharges']
-
-# Service utilization
-premium_services = ['OnlineSecurity', 'OnlineBackup', 'DeviceProtection', 'TechSupport']
-df['premium_services_count'] = df[premium_services].apply(lambda x: (x == 'Yes').sum(), axis=1)
-
-# Tenure to monthly charges ratio
-df['tenure_monthly_ratio'] = df['tenure'] / (df['MonthlyCharges'] + 1e-6)
-
-# Tenure per premium service
-df['tenure_per_premium_service'] = df['tenure'] / (df['premium_services_count'] + 1e-6)
-
-# One-hot encode categorical features, including the new clv_tier
+# 3. One-hot encode categorical features
 categorical_cols = df.select_dtypes(include=['object', 'category']).columns
 df_encoded = pd.get_dummies(df, columns=categorical_cols, drop_first=True)
 
@@ -85,19 +63,19 @@ def objective(trial):
     return np.mean(f1_scores)
 
 # print("Starting hyperparameter optimization with Optuna (300 trials, 5-fold CV)...")
-study = optuna.create_study(direction='maximize')
-study.optimize(objective, n_trials=300)
+# study = optuna.create_study(direction='maximize')
+# study.optimize(objective, n_trials=300)
 
-print(f"Best trial F1-score (CV): {study.best_value}")
-print("Best hyperparameters found:")
-for key, value in study.best_params.items():
-    print(f"  {key}: {value}")
+# print(f"Best trial F1-score (CV): {study.best_value}")
+# print("Best hyperparameters found:")
+# for key, value in study.best_params.items():
+#     print(f"  {key}: {value}")
 #best_params= {'n_estimators': 1015, 'max_depth': 8, 'learning_rate': 0.010749966721711619, 'subsample': 0.7538033573276144, 'colsample_bytree': 0.754614993636156, 'gamma': 9.192659488189232, 'min_child_weight': 2}
-#best_params= {'n_estimators': 683, 'max_depth': 4, 'learning_rate': 0.012163191276554509, 'subsample': 0.5979871826927111, 'colsample_bytree': 0.786253950258694, 'gamma': 7.722044860106266, 'min_child_weight': 4}
+best_params= {'n_estimators': 683, 'max_depth': 4, 'learning_rate': 0.012163191276554509, 'subsample': 0.5979871826927111, 'colsample_bytree': 0.786253950258694, 'gamma': 7.722044860106266, 'min_child_weight': 4}
 
 # 7. Train Final Model with Best Hyperparameters
 print("\nTraining final model with best hyperparameters...")
-best_params = study.best_params
+#best_params = study.best_params
 final_model = XGBClassifier(
     **best_params,
     objective='binary:logistic',
