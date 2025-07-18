@@ -4,7 +4,7 @@
 
 This project demonstrates an end-to-end machine learning workflow for predicting customer churn and generating proactive retention strategies. The primary goal is to identify customers who are likely to churn and provide them with targeted interventions to improve retention.
 
-The solution uses a Telco Customer Churn dataset to train an XGBoost model. It then leverages SHAP (SHapley Additive exPlanations) to understand the key drivers behind each churn prediction. Based on these drivers and the calculated Customer Lifetime Value (CLV), a set of personalized retention strategies is automatically generated for at-risk customers.
+The solution uses a Telco Customer Churn dataset to train an XGBRFClassifier. It then leverages SHAP (SHapley Additive exPlanations) to understand the key drivers behind each churn prediction. Based on these drivers and the calculated Customer Lifetime Value (CLV), a set of personalized retention strategies is automatically generated for at-risk customers.
 
 ---
 
@@ -12,7 +12,7 @@ The solution uses a Telco Customer Churn dataset to train an XGBoost model. It t
 
 *   **Exploratory Data Analysis (EDA):** In-depth analysis of the dataset to understand feature distributions and correlations.
 *   **Advanced Feature Engineering:** Creation of new features, including Customer Lifetime Value (CLV), to improve model performance.
-*   **Hyperparameter Tuning:** Use of Optuna for automated hyperparameter optimization of the XGBoost model.
+*   **Hyperparameter Tuning:** Use of Optuna for automated hyperparameter optimization of the XGBRFClassifier.
 *   **Predictive Modeling:** An XGBoost classifier trained to predict customer churn with high accuracy.
 *   **Explainable AI (XAI):** Integration of SHAP to explain individual predictions and identify the top factors influencing churn for each customer.
 *   **Automated Retention Strategy:** A rule-based system that generates personalized retention offers based on a customer's CLV and their specific churn drivers.
@@ -47,7 +47,7 @@ The project is structured as a sequential pipeline:
 2.  **Model Training (`train_model.py`):**
     *   Loads the cleaned data.
     *   Engineers features, including a simplified Customer Lifetime Value (CLV).
-    *   Uses Optuna to find the best hyperparameters for an XGBoost model.
+    *   Uses Optuna to find the best hyperparameters for an XGBRFClassifier.
     *   Trains the final model on the full training set and saves it (`model.pkl`).
     *   Saves the list of features used during training (`training_columns.pkl`).
 
@@ -107,7 +107,7 @@ This project is designed with a clear separation of concerns, following modern M
 Execute the scripts in the following order to run the complete pipeline:
 
 1.  **Train the Model:**
-    *   This script will perform feature engineering and train the XGBoost model. The trained model and columns will be saved to the `Models/` directory.
+    *   This script will perform feature engineering and train the XGBRFClassifier. The trained model and columns will be saved to the `Models/` directory.
     ```bash
     python train_model.py
     ```

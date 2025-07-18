@@ -35,8 +35,6 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import RandomForestClassifier
 from xgboost import XGBRFClassifier
 
-# Use the best parameters you found previously for the champion model
-best_params= {'n_estimators': 683, 'max_depth': 4, 'learning_rate': 0.012163191276554509, 'subsample': 0.5979871826927111, 'colsample_bytree': 0.786253950258694, 'gamma': 7.722044860106266, 'min_child_weight': 4}
 
 models_to_benchmark = {
     "Decision Tree": DecisionTreeClassifier(random_state=42),

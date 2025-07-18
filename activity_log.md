@@ -130,3 +130,19 @@ This file logs the steps taken to improve the churn prediction model, the reason
 *   **Bug Identified (Optuna):** The `XGBRFClassifier` does not support `early_stopping_rounds`. The training script failed during hyperparameter optimization.
 *   **Action:** Corrected the `objective` function in `train_model.py` by removing the unsupported `fit` parameters.
 *   **Action:** Executed the corrected script, successfully tuning the `XGBRFClassifier` with Optuna and saving the new, improved model. This marks a significant improvement in the project's predictive power.
+*   **Action (Documentation):** Updated the `README.md` to retroactively frame the model selection process, highlighting the data-driven decision to use `XGBRFClassifier`.
+*   **Action (Code Quality):** Added the new, tuned `best_params` to `train_model.py` and commented out the Optuna search block to improve reproducibility and efficiency.
+*   **Action (Git):** Committed all changes, including the updated model, documentation, and training script, to establish a new baseline.
+
+### API Debugging
+
+*   **User Report:** User identified a 500 Internal Server Error when calling the API.
+*   **Diagnosis:** Identified a major performance bottleneck in `api/main.py`. The `shap.TreeExplainer` was being re-initialized on every single API call, which is computationally expensive and can cause timeouts.
+*   **Action:** Refactored the API to initialize the SHAP explainer only once on application startup, making predictions significantly more efficient.
+*   ** roadblock:** Attempting to restart the API server failed due to a `port 8000 already in use` error, indicating a lingering background process. The user has opted to debug a different issue before resolving the port conflict.
+
+### Survival Pipeline Debugging
+
+*   **User Report:** User indicated an issue with the survival prediction pipeline.
+*   **Diagnosis:** Executing `survival_prediction_pipeline.py` revealed a `ValueError: too many values to unpack`. This was traced to the `prepare_data_for_survival` function in `data_processing.py`, which was incorrectly trying to unpack two variables from the `engineer_features` function that now only returns one.
+*   **Action:** Corrected the function call in `data_processing.py` to handle the single DataFrame return value. The pipeline now executes successfully.

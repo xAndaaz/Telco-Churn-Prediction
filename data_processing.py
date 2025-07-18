@@ -45,13 +45,16 @@ def prepare_data_for_survival(df: pd.DataFrame, is_training=False) -> pd.DataFra
     This is for the Cox Proportional Hazards model.
     """
     # Apply all feature engineering
-    df, clv_bins_survival = engineer_features(df, is_training=is_training)
+    df = engineer_features(df, is_training=is_training)
 
     if not is_training:
         # For prediction, you would load pre-saved bins. This is a placeholder.
         # To make this runnable, we'll just use some default bins if not training.
         # A more robust solution would be required for a true prediction pipeline.
         clv_bins_survival = [df['clv'].min(), df['clv'].quantile(0.33), df['clv'].quantile(0.66), df['clv'].max()]
+    else:
+        # When training, we define the bins
+        _, clv_bins_survival = pd.cut(df['clv'], bins=3, retbins=True)
 
     df['clv_tier'] = pd.cut(df['clv'], bins=clv_bins_survival, labels=['Low', 'Medium', 'High'], include_lowest=True)
     

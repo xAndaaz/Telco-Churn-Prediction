@@ -12,10 +12,12 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from data_processing import prepare_data_for_prediction
 
 # --- 1. SETUP ---
-# Load model
+# Load model and explainer at startup
 model_path = os.path.join(os.path.dirname(__file__), '..', 'Models', 'model.pkl')
 with open(model_path, 'rb') as f:
     model = pickle.load(f)
+
+explainer = shap.TreeExplainer(model)
 
 # Initialize the FastAPI app
 app = FastAPI(
@@ -60,14 +62,14 @@ def predict_churn(customer_data: CustomerData):
     df = pd.DataFrame([customer_data.dict()])
     
     # Prepare the data for the model
-    df_prepared = prepare_data_for_prediction(df)
+    # Note: The function now returns two dataframes, we only need the first for the model
+    df_prepared, _ = prepare_data_for_prediction(df)
     
     # Get prediction and probability
     prediction = model.predict(df_prepared)[0]
     probability = model.predict_proba(df_prepared)[:, 1][0]
     
-    # Get SHAP explanations for the top 3 drivers
-    explainer = shap.TreeExplainer(model)
+    # Get SHAP explanations using the pre-loaded explainer
     shap_values = explainer.shap_values(df_prepared)
     
     shap_df = pd.DataFrame(shap_values, columns=df_prepared.columns)

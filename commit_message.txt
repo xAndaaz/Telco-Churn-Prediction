@@ -1,8 +1,10 @@
-feat(model): Tune and select XGBRFClassifier as champion model
+fix(pipeline): Correct survival pipeline and optimize API
 
-- Analyzed initial benchmark results and identified XGBRFClassifier as the best performing baseline model.
-- Pivoted strategy to adopt XGBRFClassifier as the new champion, replacing the previous XGBClassifier.
-- Implemented and executed a full hyperparameter tuning pipeline for XGBRFClassifier using Optuna.
-- Corrected a bug in the Optuna objective function where an unsupported 'early_stopping_rounds' parameter was being passed to the model.
-- The newly tuned model shows improved performance and has been saved as the new `model.pkl`.
-- Updated `experiments.json` with the latest benchmarking results.
+- Resolved a `ValueError` in the survival analysis pipeline caused by an incorrect function signature call in `data_processing.py`.
+- Optimized the FastAPI application by initializing the `shap.TreeExplainer` once at startup, preventing a major performance bottleneck and potential 500 errors.
+
+docs(readme): Update all project documentation
+
+- Overhauled `devReadme.md` to provide a complete and accurate developer's guide, reflecting the latest model architecture (XGBRFClassifier), data flows, and code logic.
+- Updated the main `README.md` to be consistent with the new champion model.
+- Updated `activity_log.md` to record the latest debugging and documentation tasks.
