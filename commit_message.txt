@@ -1,1 +1,8 @@
-docs: Add latest Optuna best params to train_model.py
+feat(model): Tune and select XGBRFClassifier as champion model
+
+- Analyzed initial benchmark results and identified XGBRFClassifier as the best performing baseline model.
+- Pivoted strategy to adopt XGBRFClassifier as the new champion, replacing the previous XGBClassifier.
+- Implemented and executed a full hyperparameter tuning pipeline for XGBRFClassifier using Optuna.
+- Corrected a bug in the Optuna objective function where an unsupported 'early_stopping_rounds' parameter was being passed to the model.
+- The newly tuned model shows improved performance and has been saved as the new `model.pkl`.
+- Updated `experiments.json` with the latest benchmarking results.

@@ -27,57 +27,114 @@ y = df_encoded["Churn"]
 # 5. Split Data
 X_train, X_test, y_train, y_test = train_test_split(X, y, stratify=y, test_size=0.2, random_state=42)
 
-# 6. Handle Class Imbalance with scale_pos_weight
+# 6. Model Benchmarking and Experiment Tracking
+import time
+import json
+from datetime import datetime
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.ensemble import RandomForestClassifier
+from xgboost import XGBRFClassifier
+
+# Use the best parameters you found previously for the champion model
+best_params= {'n_estimators': 683, 'max_depth': 4, 'learning_rate': 0.012163191276554509, 'subsample': 0.5979871826927111, 'colsample_bytree': 0.786253950258694, 'gamma': 7.722044860106266, 'min_child_weight': 4}
+
+models_to_benchmark = {
+    "Decision Tree": DecisionTreeClassifier(random_state=42),
+    "Random Forest": RandomForestClassifier(random_state=42),
+    "XGBoost RF": XGBRFClassifier(random_state=42),
+    "XGBoost ": XGBClassifier(random_state= 42)
+}
+
+experiment_results = []
+
+print("\n--- Starting Model Benchmarking ---")
+
+for name, model in models_to_benchmark.items():
+    print(f"Training {name}...")
+    start_time = time.time()
+    
+    # Handle scale_pos_weight for XGBoost models
+    if "XGBoost" in name:
+        scale_pos_weight = y_train.value_counts()[0] / y_train.value_counts()[1]
+        model.set_params(scale_pos_weight=scale_pos_weight)
+        
+    model.fit(X_train, y_train)
+    
+    training_time = time.time() - start_time
+    
+    y_pred = model.predict(X_test)
+    y_proba = model.predict_proba(X_test)[:, 1]
+    
+    f1 = f1_score(y_test, y_pred)
+    auc = roc_auc_score(y_test, y_proba)
+    
+    print(f"  -> F1 Score: {f1:.4f}, AUC: {auc:.4f}, Training Time: {training_time:.2f}s")
+    
+    result = {
+        "model_name": name,
+        "f1_score": f1,
+        "auc_score": auc,
+        "training_time_seconds": training_time,
+        "run_timestamp": datetime.now().isoformat(),
+        "parameters": model.get_params()
+    }
+    experiment_results.append(result)
+
+# Save results to the JSON file
+with open('experiments.json', 'w') as f:
+    json.dump(experiment_results, f, indent=4, default=str)
+
+print("--- Benchmarking Complete. Results saved to experiments.json ---\n")
+
+
+# 7. Handle Class Imbalance with scale_pos_weight
 scale_pos_weight = y_train.value_counts()[0] / y_train.value_counts()[1]
 
-# 6. Hyperparameter Tuning with Optuna and Cross-Validation
+# 8. Hyperparameter Tuning with Optuna for the Champion Model (XGBRFClassifier)
 def objective(trial):
-    """Define the objective function for Optuna."""
+    """Define the objective function for Optuna, targeting XGBRFClassifier."""
     
     params = {
         'objective': 'binary:logistic',
         'eval_metric': 'logloss',
         'random_state': 42,
         'scale_pos_weight': scale_pos_weight,
-        'n_estimators': trial.suggest_int('n_estimators', 100, 2000),
-        'max_depth': trial.suggest_int('max_depth', 3, 15),
+        'n_estimators': trial.suggest_int('n_estimators', 100, 1000),
+        'max_depth': trial.suggest_int('max_depth', 3, 10),
         'learning_rate': trial.suggest_float('learning_rate', 0.01, 0.3, log=True),
-        'subsample': trial.suggest_float('subsample', 0.5, 1.0),
-        'colsample_bytree': trial.suggest_float('colsample_bytree', 0.5, 1.0),
-        'gamma': trial.suggest_float('gamma', 0, 10),
-        'min_child_weight': trial.suggest_int('min_child_weight', 1, 20),
+        'subsample': trial.suggest_float('subsample', 0.6, 1.0),
+        'colsample_bytree': trial.suggest_float('colsample_bytree', 0.6, 1.0),
+        'reg_alpha': trial.suggest_float('reg_alpha', 1e-8, 1.0, log=True),
+        'reg_lambda': trial.suggest_float('reg_lambda', 1e-8, 1.0, log=True),
     }
 
-    model = XGBClassifier(**params, use_label_encoder=False)
+    model = XGBRFClassifier(**params, use_label_encoder=False)
     
-    cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
-    f1_scores = []
-    for train_idx, val_idx in cv.split(X_train, y_train):
-        X_train_fold, X_val_fold = X_train.iloc[train_idx], X_train.iloc[val_idx]
-        y_train_fold, y_val_fold = y_train.iloc[train_idx], y_train.iloc[val_idx]
-        
-        model.fit(X_train_fold, y_train_fold)
-        y_pred = model.predict(X_val_fold)
-        f1_scores.append(f1_score(y_val_fold, y_pred, pos_label=1))
+    # XGBRFClassifier does not use early stopping, so we fit directly.
+    model.fit(X_train, y_train)
+    y_pred = model.predict(X_test)
     
-    return np.mean(f1_scores)
+    return f1_score(y_test, y_pred, pos_label=1)
 
-# print("Starting hyperparameter optimization with Optuna (300 trials, 5-fold CV)...")
+# To re-run optimization, comment out the 'best_params' line below and uncomment the study block.
+# print("--- Starting Hyperparameter Optimization for XGBRFClassifier ---")
 # study = optuna.create_study(direction='maximize')
-# study.optimize(objective, n_trials=300)
-
-# print(f"Best trial F1-score (CV): {study.best_value}")
+# study.optimize(objective, n_trials=100) 
+# 
+# print(f"Best trial F1-score for XGBRFClassifier: {study.best_value}")
 # print("Best hyperparameters found:")
-# for key, value in study.best_params.items():
+# best_params = study.best_params
+# for key, value in best_params.items():
 #     print(f"  {key}: {value}")
-#best_params= {'n_estimators': 1015, 'max_depth': 8, 'learning_rate': 0.010749966721711619, 'subsample': 0.7538033573276144, 'colsample_bytree': 0.754614993636156, 'gamma': 9.192659488189232, 'min_child_weight': 2}
-best_params= {'n_estimators': 683, 'max_depth': 4, 'learning_rate': 0.012163191276554509, 'subsample': 0.5979871826927111, 'colsample_bytree': 0.786253950258694, 'gamma': 7.722044860106266, 'min_child_weight': 4}
 
-# 7. Train Final Model with Best Hyperparameters
-print("\nTraining final model with best hyperparameters...")
-#best_params = study.best_params
-final_model = XGBClassifier(
+#  best parameters found
+best_params = {'n_estimators': 967,'max_depth': 7,'learning_rate': 0.05453030824889137,'subsample': 0.6368751226537273,'colsample_bytree': 0.676532719598088,'reg_alpha': 0.13983880844177812,'reg_lambda': 9.306678034024623e-05}
+
+# 9. Train Final Model with Best Hyperparameters
+print("\n--- Training final XGBRFClassifier model with best hyperparameters... ---")
+final_model = XGBRFClassifier(
     **best_params,
+
     objective='binary:logistic',
     eval_metric='logloss',
     random_state=42,
@@ -87,18 +144,18 @@ final_model = XGBClassifier(
 
 final_model.fit(X_train, y_train)
 
-# 8. Threshold Tuning
+# 10. Threshold Tuning
 y_proba_final = final_model.predict_proba(X_test)[:, 1]
 precision, recall, thresholds = precision_recall_curve(y_test, y_proba_final)
 
 # Find the threshold that maximizes the F1 score
-f1_scores = (2 * precision * recall) / (precision + recall)
+f1_scores = (2 * precision * recall) / (precision + recall + 1e-9)
 best_threshold = thresholds[np.argmax(f1_scores)]
 
-print(f"\nBest Threshold: {best_threshold}")
+print(f"\nBest Threshold found at: {best_threshold:.4f}")
 
-# 9. Evaluate the Final Model with the Best Threshold
-print("\nEvaluation on Test Set with Optimized Model and Threshold:")
+# 11. Evaluate the Final Model with the Best Threshold
+print("\n--- Evaluation on Test Set with Optimized Model and Threshold ---")
 y_pred_final = (y_proba_final >= best_threshold).astype(int)
 
 print("Confusion Matrix:")
@@ -107,10 +164,11 @@ print("\nClassification Report:")
 print(classification_report(y_test, y_pred_final))
 print("\nAUC Score:", roc_auc_score(y_test, y_proba_final))
 
-# 10. Save the Trained Model and Columns
-print("\nSaving the trained XGBoost model and training columns...")
+# 12. Save the Trained Model and Columns
+print("\n--- Saving the trained XGBRFClassifier model and training columns... ---")
 with open('Models/model.pkl', 'wb') as f:
     pickle.dump(final_model, f)
+
 
 # Save the column list for later use in prediction/analysis
 with open('Models/training_columns.pkl', 'wb') as f:

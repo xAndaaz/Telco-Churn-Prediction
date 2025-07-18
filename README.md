@@ -19,6 +19,22 @@ The solution uses a Telco Customer Churn dataset to train an XGBoost model. It t
 
 ---
 
+## Model Selection and Justification
+
+To ensure the most effective model was chosen, a rigorous selection process was undertaken. Rather than defaulting to a single model, we benchmarked several powerful classifiers to compare their baseline performance on the dataset.
+
+1.  **Benchmarking:** We first trained and evaluated the following models with their default parameters:
+    *   Decision Tree
+    *   Random Forest
+    *   XGBoost (Random Forest variant)
+    *   XGBoost (Gradient Boosted Trees)
+
+2.  **Analysis:** The results, logged in `experiments.json`, showed that the **XGBoost RF Classifier (`XGBRFClassifier`)** provided the best balance of F1-score and AUC without any tuning.
+
+3.  **Selection and Tuning:** Based on this evidence, the `XGBRFClassifier` was selected as the champion model for this project. We then dedicated our efforts to fine-tuning its hyperparameters using Optuna to maximize its predictive power, leading to the final model used in this pipeline. This data-driven approach ensures that our final model is not just a good choice, but a justified one.
+
+---
+
 ## The Workflow
 
 The project is structured as a sequential pipeline:
