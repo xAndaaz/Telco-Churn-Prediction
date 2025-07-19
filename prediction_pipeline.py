@@ -1,7 +1,6 @@
 import pandas as pd
 import pickle
 import shap
-from retention_strategy import get_retention_strategies
 from data_processing import prepare_data_for_prediction
 
 # --- 1. LOAD MODELS AND COLUMNS (Load once to be used by functions) ---
@@ -24,7 +23,7 @@ def run_prediction_pipeline(df):
         df (pd.DataFrame): A dataframe with customer data.
         
     Returns:
-        pd.DataFrame: The original dataframe with added columns for predictions and strategies.
+        pd.DataFrame: The original dataframe with added columns for predictions and SHAP drivers.
     """
     
     # Prepare the data
@@ -47,18 +46,6 @@ def run_prediction_pipeline(df):
     results['top_churn_drivers'] = top_features
     # Add the clv_tier from the intermediate dataframe
     results['clv_tier'] = df_with_tiers['clv_tier']
-
-    # Generate retention strategies for customers predicted to churn
-    churning_customers_mask = results['churn_prediction'] == 1
-    if churning_customers_mask.any():
-        strategies = results[churning_customers_mask].apply(
-            lambda row: " | ".join(get_retention_strategies(row.to_dict(), row['top_churn_drivers'])),
-            axis=1
-        )
-        results.loc[churning_customers_mask, 'retention_strategy'] = strategies
-    
-    # Fill strategy for non-churners
-    results['retention_strategy'].fillna("No action needed", inplace=True)
     
     return results
 
@@ -83,5 +70,5 @@ if __name__ == '__main__':
 
     print(f"Pipeline complete. Results saved to '{output_path}'")
     print("\n--- Sample of Results")
-    print(prediction_results[['customerID', 'churn_prediction', 'churn_probability', 'retention_strategy']].head())
+    print(prediction_results[['customerID', 'churn_prediction', 'churn_probability', 'top_churn_drivers']].head())
     print("\n")

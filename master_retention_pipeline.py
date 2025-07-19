@@ -12,11 +12,11 @@ def generate_churn_risk_profiles():
     # 1. Load the data from the two pipelines
     try:
         classification_results = pd.read_csv('Dataset/retention_candidates.csv')
-        survival_results = pd.read_csv('Dataset/survival_retention_plan.csv')
+        survival_results = pd.read_csv('Dataset/survival_risk_analysis.csv')
         print("Successfully loaded data from classification and survival pipelines.")
     except FileNotFoundError as e:
         print(f"Error: Could not find input file. {e}")
-        print("Please ensure both 'prediction_pipeline.py' and 'survival_retention_strategy.py' have been run successfully.")
+        print("Please ensure both 'prediction_pipeline.py' and 'survival_risk_analyzer.py' have been run successfully.")
         return
 
     # 2. Merge the two dataframes into a single master view
@@ -49,11 +49,11 @@ def generate_churn_risk_profiles():
     print("Insights generated.")
 
     # 5. Final Cleanup
-    # Drop the old, now redundant, strategy columns
-    final_df = master_df.drop(columns=['retention_strategy_x', 'retention_strategy_y'])
+    # Drop the now redundant columns
+    final_df = master_df.drop(columns=['top_churn_drivers'])
     
     # Reorder columns for better readability
-    cols_to_front = ['customerID', 'churn_prediction', 'churn_probability', 'ProbabilityRiskTier', 'ActionableInsight', 'clv_tier']
+    cols_to_front = ['customerID', 'churn_prediction', 'ProbabilityRiskTier', 'TimeBasedRisk', 'ActionableInsight', 'clv_tier', 'churn_probability']
     other_cols = [col for col in final_df.columns if col not in cols_to_front]
     final_df = final_df[cols_to_front + other_cols]
     
@@ -64,12 +64,9 @@ def generate_churn_risk_profiles():
     
     print("\n--- Sample of Final Churn Risk Profiles ---")
     # Print a sample of the most important columns
-    print(final_df[['customerID', 'ProbabilityRiskTier', 'ActionableInsight']].head())
+    print(final_df[['customerID', 'ProbabilityRiskTier', 'TimeBasedRisk', 'ActionableInsight']].head())
 
 if __name__ == '__main__':
     generate_churn_risk_profiles()
 
 
-
-if __name__ == '__main__':
-    generate_churn_risk_profiles()

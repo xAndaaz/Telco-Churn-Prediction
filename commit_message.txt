@@ -1,6 +1,9 @@
-feat(pipeline): Create unified Churn Risk Profile pipeline
+refactor(pipeline): Align project with advisory philosophy
 
-- Implemented a new master pipeline (`master_retention_pipeline.py`) that unifies the outputs of the classification and survival models into a single, powerful Churn Risk Profile.
-- Created a new `churn_analyzer.py` module to translate technical SHAP drivers into human-readable, actionable insights, pivoting from a prescriptive to an advisory approach.
-- Implemented quantile-based risk tiering on the at-risk population to robustly segment customers into High, Medium, and Low risk categories.
-- The final output is a clean, consolidated `master_retention_plan.csv` that provides a multi-faceted view of each customer's churn risk.
+- Fully refactored the project to align with the "advise, don't prescribe" philosophy.
+- Deleted the obsolete `retention_strategy.py` script.
+- Refactored `prediction_pipeline.py` to remove calls to the deleted script, simplifying its purpose.
+- Renamed `survival_retention_strategy.py` to `survival_risk_analyzer.py`.
+- Modified the new analyzer to output a clean, categorical `TimeBasedRisk` tier (e.g., "Urgent") instead of prescriptive sentences.
+- Updated the master pipeline and churn analyzer to use this new, cleaner input.
+- This change makes the entire project more consistent, robust, and professional.

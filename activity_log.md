@@ -178,3 +178,14 @@ This file logs the steps taken to improve the churn prediction model, the reason
     2.  Implements quantile-based risk tiering ("High", "Medium", "Low") on the at-risk population to solve the narrow probability issue.
     3.  Applies the new `churn_analyzer` logic to generate a final, unified insight for each customer.
 *   **Outcome:** The project now produces a single, powerful `master_retention_plan.csv` file that provides a multi-faceted, easy-to-understand risk profile for every customer, fulfilling a key project goal.
+
+### Final Code Cleanup and Refactoring
+
+*   **User Insight:** The user correctly identified that our "advise, don't prescribe" philosophy made the original `retention_strategy.py` script obsolete and the `survival_retention_strategy.py` script inconsistent.
+*   **Rationale:** Keeping these legacy scripts would create confusion and technical debt. A full refactor is necessary to align the entire project with our new, more professional advisory approach.
+*   **Plan:**
+    1.  **Delete Obsolete Script:** `retention_strategy.py` will be deleted.
+    2.  **Refactor Prediction Pipeline:** `prediction_pipeline.py` will be modified to remove the call to the deleted script.
+    3.  **Refactor Survival Analyzer:** `survival_retention_strategy.py` will be renamed to `survival_risk_analyzer.py`. Its logic will be changed to output a clean, categorical risk tier (e.g., "Urgent") instead of a prescriptive sentence.
+    4.  **Update Master Pipeline:** The master pipeline will be updated to use the new, cleaner output from the refactored survival analyzer.
+*   **Goal:** To create a clean, consistent, and professional codebase with no legacy components, fully aligned with the project's final advisory philosophy.

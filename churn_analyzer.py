@@ -43,7 +43,7 @@ def generate_actionable_insight(customer_row):
     # We also add the time-based urgency from the survival model.
     
     # Rename the survival strategy column for clarity
-    time_based_risk = customer_row.get('retention_strategy_y', 'Risk timeline not available.')
+    time_based_risk = customer_row.get('TimeBasedRisk', 'Risk timeline not available.')
 
     final_summary = f"**Urgency:** {time_based_risk}\n\n"
     final_summary += "**Key Factors Identified:**\n"
