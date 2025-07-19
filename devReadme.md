@@ -1,118 +1,90 @@
 # Developer's Guide: Customer Churn Prediction Project
 
-**Version: 3.0**
+**Version: 4.0**
 
-## 1. Project Philosophy & Core Concepts
+## 1. Project Philosophy: The Advisory Approach
 
-This document is the definitive guide for developers working on this project.
+This document is the definitive technical guide for developers.
 
-The system's goal is to create an **actionable intelligence tool**. We don't just classify customers; we provide a complete workflow from data analysis to a prescriptive retention plan, served via a user-friendly interface.
-
-Before diving into the code, make sure you understand these key concepts, as they are central to the project's design:
-
-*   **XGBRFClassifier:** A Random Forest variant from the XGBoost library. It was chosen as our core classification model after a data-driven benchmarking process showed it had the best baseline performance. It offers a great balance of speed and predictive power.
-*   **SHAP (SHapley Additive exPlanations):** The foundation of our "Explainable AI" (XAI). We use the `shap.TreeExplainer` specifically for our tree-based model. It calculates the impact of each feature on the final prediction for a *single customer*. The features with the highest absolute SHAP values are our "top churn drivers."
-*   **Survival Analysis (CoxPH Model):** A more advanced statistical method that reframes the problem from *if* a customer will churn to *when* they are likely to churn. We use the `lifelines` library's `CoxPHFitter` to model churn risk over time. This provides a much richer, time-sensitive view of customer behavior.
-*   **Training-Serving Skew:** This is a critical MLOps failure mode where data used for live predictions (serving) is processed differently than the data used to train the model. We aggressively prevent this by centralizing all feature engineering logic into `feature_engineering.py` and having a single `data_processing.py` module handle all data preparation.
-*   **FastAPI & Pydantic:** FastAPI is our choice for the backend API due to its high speed and automatic data validation/documentation. Pydantic models (e.g., `CustomerData`) are used to define the exact structure and data types of our API inputs, preventing bad data from ever reaching our model.
-*   **Streamlit:** Our choice for the frontend dashboard. It allows us to build interactive data applications using pure Python, making it ideal for rapid development and iteration.
+The system's goal is to create an **advisory intelligence tool**. We do not prescribe specific business actions. Instead, we provide a complete, data-driven workflow that generates a rich **Churn Risk Profile** for each customer. This profile empowers business users with a deep understanding of the *'if'*, *'why'*, and *'when'* of churn risk, allowing them to formulate the best retention strategies based on their own domain knowledge and resources.
 
 ---
 
-## 2. Data Flow Diagrams
+## 2. Core Concepts & Key Technologies
 
-### 2.1. Classification Workflow
+*   **XGBRFClassifier:** A Random Forest variant from the XGBoost library. It was chosen as our core classification model after a data-driven benchmarking process showed it had the best baseline performance.
+*   **SMOTEENN:** A sophisticated hybrid sampling technique used to address the class imbalance in the dataset. It combines SMOTE (over-sampling) with ENN (cleaning), which resulted in a high-precision model that is more reliable for high-cost retention scenarios.
+*   **SHAP (SHapley Additive exPlanations):** The foundation of our "Explainable AI" (XAI). We use `shap.TreeExplainer` to calculate the impact of each feature on the final prediction for a single customer. These are our "top churn drivers."
+*   **Survival Analysis (CoxPH Model):** A statistical method that models the *time-to-event*. We use the `lifelines` library's `CoxPHFitter` to predict *when* a customer is likely to churn, providing a time-based risk dimension.
+*   **Quantile-Based Tiering:** A robust method for segmenting at-risk customers. Instead of using fixed probability thresholds, we rank churners by their probability score and group them into "High", "Medium", and "Low" risk tiers based on their percentile. This adapts to the model's probability distribution.
+*   **Centralized Logic:** All feature creation is centralized in `feature_engineering.py`, and all data preparation is handled by `data_processing.py` to prevent training-serving skew.
 
-This diagram shows how data moves through the system for the binary churn classification task.
+---
 
-```
-[Telco-Customer-Churn.csv]
-           |
-           v
-[1. train_model.py]
-   - Imports logic from [feature_engineering.py]
-   - Benchmarks multiple classifiers (Decision Tree, RF, XGBoost)
-   - Selects XGBRFClassifier as champion
-   - Tunes Hyperparameters (Optuna)
-   - Trains final model
-   - SAVES --> [model.pkl, training_columns.pkl, clv_bins.pkl]
-           |
-           +------------------------------------------------+
-           |                                                |
-           v                                                v
-[2. data_processing.py]                             [3. api/main.py]
-   - Imports logic from [feature_engineering.py]    - Loads model.pkl & SHAP explainer at startup
-   - Contains prepare_data_for_prediction()         - Exposes /predict endpoint
-   - USES --> [training_columns.pkl, clv_bins.pkl]    |
-           ^                                                | USES
-           | IMPORTS                                        |
-           |                                                v
-[4. prediction_pipeline.py & dashboard/app.py (Batch)]      |
-   - Takes user CSV                                         |
-   - Calls prepare_data_for_prediction()                    |
-   - Makes batch predictions                              [5. dashboard/app.py (Real-time)]
-   - Generates retention strategies                       - Takes user form input
-                                                            - Calls /predict endpoint on api/main.py
-                                                            - Displays results
-```
+## 3. The Unified Data Flow
 
-### 2.2. Survival Analysis Workflow
-
-This diagram shows the flow for the more advanced time-to-event analysis.
+The entire system is orchestrated by the Streamlit dashboard, which executes the pipelines in sequence.
 
 ```
-[Telco-Customer-Churn.csv]
+[User Uploads CSV]
            |
            v
-[1. train_survival_model.py]
-   - Calls prepare_data_for_survival() from [data_processing.py]
-   - Trains the CoxPH model
-   - SAVES --> [survival_model.pkl]
+[dashboard/app.py] --> Saves to [Dataset/temp_uploaded_data.csv]
            |
-           v
-[2. survival_prediction_pipeline.py]
-   - Loads survival_model.pkl
-   - Takes new customer data
-   - Calls prepare_data_for_survival()
-   - Predicts survival probabilities over time
-   - SAVES --> [survival_predictions.csv]
-           |
-           v
-[3. survival_retention_strategy.py]
-    - Loads survival_predictions.csv
-    - Applies time-based rules
-    - Generates tiered retention strategies (Urgent, Medium Risk, etc.)
-    - SAVES --> [survival_retention_plan.csv]
+           +-----------------------------------------------------------------+
+           |                                                                 |
+           v (Executes)                                                      v (Executes)
+[1. prediction_pipeline.py]                                       [2. survival_prediction_pipeline.py]
+   - Loads temp data                                                 - Loads temp data
+   - Predicts churn & SHAP drivers                                   - Predicts survival probabilities
+   - SAVES --> [Dataset/retention_candidates.csv]                    - SAVES --> [Dataset/survival_predictions.csv]
+           |                                                                 |
+           |                                                                 v (Executes)
+           |                                                      [3. survival_risk_analyzer.py]
+           |                                                         - Loads survival_predictions.csv
+           |                                                         - Assigns time-based risk tiers
+           |                                                         - SAVES --> [Dataset/survival_risk_analysis.csv]
+           |                                                                 |
+           +------------------------+----------------------------------------+
+                                    |
+                                    v (Executes)
+                       [4. master_retention_pipeline.py]
+                          - Loads retention_candidates.csv
+                          - Loads survival_risk_analysis.csv
+                          - Merges the data
+                          - Applies quantile-based tiering
+                          - Calls [churn_analyzer.py] to generate insights
+                          - SAVES --> [Dataset/master_retention_plan.csv]
+                                    |
+                                    v
+                       [dashboard/app.py] --> Loads and displays the final result
 ```
 
 ---
 
-## 3. Deep Dive into Code Components
-
-### `feature_engineering.py`
-**Purpose:** To be the single source of truth for creating new features. This module is imported by `data_processing.py` to ensure consistency.
-*   **Key Logic:** Contains the `engineer_features` function which calculates Customer Lifetime Value (CLV) and other interaction features.
+## 4. Deep Dive into Code Components
 
 ### `train_model.py`
-**Purpose:** To perform a rigorous, data-driven process of model selection, tuning, and training for our **binary classification** task.
+**Purpose:** To perform a rigorous, data-driven process of model selection, tuning, and training.
 *   **Key Logic:**
-    1.  **Feature Engineering:** Imports and runs `engineer_features`.
-    2.  **Benchmarking:** Trains and evaluates several baseline models (Decision Tree, Random Forest, XGBoost, XGBRFClassifier) to find the best performer on default settings. The results are saved to `experiments.json`.
-    3.  **Hyperparameter Tuning:** Uses the Optuna library to perform a search for the best hyperparameters for the champion model (`XGBRFClassifier`), optimizing for F1-score.
-    4.  **Final Training:** Trains the `XGBRFClassifier` on the full training set using the best parameters found by Optuna.
-    5.  **Threshold Tuning:** Calculates the optimal probability threshold to maximize the F1-score, balancing precision and recall.
-    6.  **Serialization:** Saves the final trained model (`model.pkl`), the list of training columns (`training_columns.pkl`), and the CLV bin definitions (`clv_bins.pkl`) to the `Models/` directory.
+    1.  **Benchmarking:** Compares several baseline models and saves the results to `experiments.json`.
+    2.  **Imbalance Handling:** Applies **SMOTEENN** to the training set to create a balanced and clean dataset for the model.
+    3.  **Hyperparameter Tuning:** Uses **Optuna** to find the optimal hyperparameters for the `XGBRFClassifier`.
+    4.  **Serialization:** Saves the final trained model (`model.pkl`) and other assets.
 
-### `data_processing.py`
-**Purpose:** To be the single source of truth for all data preparation, preventing training-serving skew.
-*   **`prepare_data_for_prediction(df)`:** Prepares data for the **XGBRFClassifier model**. It calls `engineer_features`, applies one-hot encoding, and aligns the columns to match the training data. It returns both the model-ready data and a version with the human-readable `clv_tier` for use in the prediction pipeline.
-*   **`prepare_data_for_survival(df)`:** Prepares data for the **CoxPH survival model**. It also calls `engineer_features` but performs slightly different processing to keep the `tenure` and `Churn` columns in the format required by the `lifelines` library.
+### `churn_analyzer.py`
+**Purpose:** To be the "translation layer" between the technical model outputs and the business user.
+*   **Key Logic:** Contains the `generate_actionable_insight` function, which uses a mapping of SHAP drivers and survival risk tiers to generate a human-readable text summary for each customer.
 
-### `api/main.py`
-**Purpose:** To serve the **classification model** as a high-performance, real-time web service.
+### `master_retention_pipeline.py`
+**Purpose:** The central orchestrator that creates the final Churn Risk Profile.
+*   **Key Logic:** Merges the outputs of the classification and survival pipelines, applies quantile-based risk tiering, and uses the `churn_analyzer` to create the final `ActionableInsight` column.
+
+### `dashboard/app.py`
+**Purpose:** The user-facing interface for the entire system.
 *   **Key Logic:**
-    *   **Optimized Loading:** The `XGBRFClassifier` model and the `shap.TreeExplainer` are loaded into memory **only once** when the FastAPI application starts. This is a critical optimization that prevents the computationally expensive explainer from being re-created on every API call, ensuring low latency.
-    *   **Prediction Endpoint:** The `/predict` endpoint accepts customer data via a Pydantic model, calls the `prepare_data_for_prediction` function, and returns a JSON object with the churn prediction, probability, and a list of the top 3 churn drivers from SHAP.
+    *   **Batch Processing:** Provides a file uploader that triggers a `subprocess` call to run the entire sequence of pipelines, displaying the final unified result.
+    *   **Real-time Analysis:** Includes a form for single-customer data entry, which calls the `/predict` endpoint on the FastAPI and displays the key churn drivers.
 
 ---
 
