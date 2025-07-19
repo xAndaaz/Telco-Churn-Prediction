@@ -1,9 +1,7 @@
-refactor(pipeline): Align project with advisory philosophy
+feat(dashboard): Overhaul and integrate with master pipeline
 
-- Fully refactored the project to align with the "advise, don't prescribe" philosophy.
-- Deleted the obsolete `retention_strategy.py` script.
-- Refactored `prediction_pipeline.py` to remove calls to the deleted script, simplifying its purpose.
-- Renamed `survival_retention_strategy.py` to `survival_risk_analyzer.py`.
-- Modified the new analyzer to output a clean, categorical `TimeBasedRisk` tier (e.g., "Urgent") instead of prescriptive sentences.
-- Updated the master pipeline and churn analyzer to use this new, cleaner input.
-- This change makes the entire project more consistent, robust, and professional.
+- Completely overhauled the Streamlit dashboard (`dashboard/app.py`) to align with the new unified Churn Risk Profile pipeline.
+- Replaced the multi-button interface with a single, streamlined "Generate Churn Risk Profiles" button for batch processing.
+- The dashboard now executes the master pipeline via `subprocess` and displays the final, rich `ActionableInsight` and risk tiers.
+- Updated the real-time prediction form to provide advisory insights consistent with the project's new philosophy.
+- Refactored `prediction_pipeline.py` and `survival_prediction_pipeline.py` to accept command-line arguments, enabling the dashboard to control them.

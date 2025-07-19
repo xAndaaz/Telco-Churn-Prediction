@@ -41,13 +41,20 @@ def run_survival_prediction_pipeline(df: pd.DataFrame) -> pd.DataFrame:
     
     return results_df
 
+import argparse
+
 if __name__ == "__main__":
-    print("Running survival prediction pipeline on 'Dataset/sample_test.csv'...")
+    parser = argparse.ArgumentParser(description="Run the survival prediction pipeline.")
+    parser.add_argument('--input', type=str, default='Dataset/sample_test.csv',
+                        help="Path to the input CSV file. Defaults to 'Dataset/sample_test.csv'.")
+    args = parser.parse_args()
+
+    print(f"Running survival prediction pipeline on '{args.input}'...")
     
     try:
-        sample_df = pd.read_csv('Dataset/sample_test.csv')
+        sample_df = pd.read_csv(args.input)
     except FileNotFoundError:
-        print("Error: 'Dataset/sample_test.csv' not found. Cannot run the pipeline.")
+        print(f"Error: '{args.input}' not found. Cannot run the pipeline.")
         exit()
 
     # Run the pipeline

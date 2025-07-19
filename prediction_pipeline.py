@@ -51,14 +51,21 @@ def run_prediction_pipeline(df):
 
 # SCRIPT EXECUTION (for command-line use) 
 
+import argparse
+
 if __name__ == '__main__':
-    print("Running prediction pipeline on 'Dataset/sample_test.csv'...")
+    parser = argparse.ArgumentParser(description="Run the churn prediction pipeline.")
+    parser.add_argument('--input', type=str, default='Dataset/sample_test.csv',
+                        help="Path to the input CSV file. Defaults to 'Dataset/sample_test.csv'.")
+    args = parser.parse_args()
+
+    print(f"Running prediction pipeline on '{args.input}'...")
     
     # Load sample data
     try:
-        sample_df = pd.read_csv('Dataset/sample_test.csv')
+        sample_df = pd.read_csv(args.input)
     except FileNotFoundError:
-        print("Error: 'Dataset/sample_test.csv' not found. Cannot run the pipeline.")
+        print(f"Error: '{args.input}' not found. Cannot run the pipeline.")
         exit()
     
     # Run the pipeline
@@ -72,3 +79,4 @@ if __name__ == '__main__':
     print("\n--- Sample of Results")
     print(prediction_results[['customerID', 'churn_prediction', 'churn_probability', 'top_churn_drivers']].head())
     print("\n")
+

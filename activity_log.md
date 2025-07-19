@@ -189,3 +189,14 @@ This file logs the steps taken to improve the churn prediction model, the reason
     3.  **Refactor Survival Analyzer:** `survival_retention_strategy.py` will be renamed to `survival_risk_analyzer.py`. Its logic will be changed to output a clean, categorical risk tier (e.g., "Urgent") instead of a prescriptive sentence.
     4.  **Update Master Pipeline:** The master pipeline will be updated to use the new, cleaner output from the refactored survival analyzer.
 *   **Goal:** To create a clean, consistent, and professional codebase with no legacy components, fully aligned with the project's final advisory philosophy.
+
+### Dashboard Overhaul
+
+*   **Decision:** To complete the project's user-facing component, we overhauled the Streamlit dashboard to align with the new unified pipeline.
+*   **Action:**
+    1.  The UI was simplified to a single "Generate Churn Risk Profiles" button for batch analysis.
+    2.  The backend logic was updated to call the `master_retention_pipeline.py` script using `subprocess`.
+    3.  The results display was redesigned to showcase the new, rich "Churn Risk Profile" format.
+    4.  The real-time prediction section was updated to provide advisory insights rather than prescriptive strategies.
+*   **Problem-Solving:** To allow the dashboard to run the pipelines, the `prediction_pipeline.py` and `survival_prediction_pipeline.py` scripts were modified to accept command-line arguments for input files, making them more flexible.
+*   **Outcome:** The dashboard is now a fully integrated, professional-grade tool that accurately reflects the project's sophisticated analytical capabilities.
