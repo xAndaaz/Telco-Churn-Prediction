@@ -1,7 +1,6 @@
-feat(model): Implement SMOTEENN and improve training script
+feat(pipeline): Create unified Churn Risk Profile pipeline
 
-- Implemented SMOTEENN, a hybrid sampling technique, to address class imbalance more robustly than `scale_pos_weight`.
-- The new model trained on resampled data shows a significant increase in precision (0.53 to 0.60), creating a more precise "sharpshooter" model, which has been adopted as the new champion.
-- Restored the full training script, correcting a previous error that had removed the benchmarking and Optuna logic.
-- Added comments to `train_model.py` to preserve the results of several hyperparameter tuning experiments.
-- Added `imbalanced-learn` to the project dependencies.
+- Implemented a new master pipeline (`master_retention_pipeline.py`) that unifies the outputs of the classification and survival models into a single, powerful Churn Risk Profile.
+- Created a new `churn_analyzer.py` module to translate technical SHAP drivers into human-readable, actionable insights, pivoting from a prescriptive to an advisory approach.
+- Implemented quantile-based risk tiering on the at-risk population to robustly segment customers into High, Medium, and Low risk categories.
+- The final output is a clean, consolidated `master_retention_plan.csv` that provides a multi-faceted view of each customer's churn risk.

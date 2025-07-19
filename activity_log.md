@@ -167,3 +167,14 @@ This file logs the steps taken to improve the churn prediction model, the reason
 *   **Action:** Fully restored the script, then correctly integrated the `SMOTEENN` logic without removing any existing components.
 *   **Experiment Outcome:** The SMOTEENN-trained model resulted in a significant **increase in precision** (from 0.53 to 0.60) at the cost of a **decrease in recall** (from 0.80 to 0.67). The AUC remained stable. This successfully created a "sharpshooter" model, which is preferable for high-cost retention strategies. We have adopted this as our new champion model.
 *   **Action (Code Quality):** The user ran additional tuning experiments and saved the best parameter sets as comments in `train_model.py` for future reference.
+
+### Unified Churn Risk Profile Pipeline
+
+*   **Strategic Pivot:** Based on user feedback, we made the strategic decision to pivot from prescribing retention strategies to providing a rich, advisory "Churn Risk Profile". This is a more professional and realistic approach, as it avoids making business assumptions.
+*   **Action (New Module):** Created a new `churn_analyzer.py` module to house the logic for translating technical model outputs (like SHAP drivers) into human-readable, actionable insights.
+*   **Action (New Pipeline):** Created a new `master_retention_pipeline.py` script to act as the final orchestrator.
+*   **Implementation:** The new pipeline successfully:
+    1.  Merges the outputs from the classification and survival pipelines.
+    2.  Implements quantile-based risk tiering ("High", "Medium", "Low") on the at-risk population to solve the narrow probability issue.
+    3.  Applies the new `churn_analyzer` logic to generate a final, unified insight for each customer.
+*   **Outcome:** The project now produces a single, powerful `master_retention_plan.csv` file that provides a multi-faceted, easy-to-understand risk profile for every customer, fulfilling a key project goal.
