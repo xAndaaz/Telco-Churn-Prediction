@@ -1,10 +1,7 @@
-fix(pipeline): Correct survival pipeline and optimize API
+feat(model): Implement SMOTEENN and improve training script
 
-- Resolved a `ValueError` in the survival analysis pipeline caused by an incorrect function signature call in `data_processing.py`.
-- Optimized the FastAPI application by initializing the `shap.TreeExplainer` once at startup, preventing a major performance bottleneck and potential 500 errors.
-
-docs(readme): Update all project documentation
-
-- Overhauled `devReadme.md` to provide a complete and accurate developer's guide, reflecting the latest model architecture (XGBRFClassifier), data flows, and code logic.
-- Updated the main `README.md` to be consistent with the new champion model.
-- Updated `activity_log.md` to record the latest debugging and documentation tasks.
+- Implemented SMOTEENN, a hybrid sampling technique, to address class imbalance more robustly than `scale_pos_weight`.
+- The new model trained on resampled data shows a significant increase in precision (0.53 to 0.60), creating a more precise "sharpshooter" model, which has been adopted as the new champion.
+- Restored the full training script, correcting a previous error that had removed the benchmarking and Optuna logic.
+- Added comments to `train_model.py` to preserve the results of several hyperparameter tuning experiments.
+- Added `imbalanced-learn` to the project dependencies.

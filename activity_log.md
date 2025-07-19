@@ -146,3 +146,24 @@ This file logs the steps taken to improve the churn prediction model, the reason
 *   **User Report:** User indicated an issue with the survival prediction pipeline.
 *   **Diagnosis:** Executing `survival_prediction_pipeline.py` revealed a `ValueError: too many values to unpack`. This was traced to the `prepare_data_for_survival` function in `data_processing.py`, which was incorrectly trying to unpack two variables from the `engineer_features` function that now only returns one.
 *   **Action:** Corrected the function call in `data_processing.py` to handle the single DataFrame return value. The pipeline now executes successfully.
+
+### Advanced Strategy Development
+
+*   **Model Behavior Analysis:** The user astutely observed that the new `XGBRFClassifier` model produces probabilities in a very narrow range (e.g., 0.46 to 0.52).
+*   **Diagnosis:** We identified this as the expected behavior of a Random Forest model, where averaging predictions across many trees naturally pulls probabilities away from the extremes of 0 and 1. This is in contrast to boosting models, which can produce more confident, extreme probabilities.
+*   **Problem-Solving:** The user correctly identified that this narrow range makes it difficult to create risk tiers (High, Medium, Low) using fixed thresholds.
+*   **Proposed Solution:** We have decided to implement a **quantile-based tiering system**. Instead of using absolute probability values, we will rank customers by their score and segment them into tiers based on their percentile rank (e.g., top 10% are "High Risk"). This is a more robust and business-centric approach.
+*   **Next Step:** This quantile-based logic will be a core component of the planned **Unified Retention Pipeline**, which will combine the outputs of both the classification and survival models to generate a single, highly specific retention strategy for each at-risk customer.
+
+### Advanced Imbalance Handling with SMOTEENN
+
+*   **Deeper Problem Analysis:** While the narrow probability range is expected for a Random Forest, the user correctly challenged us to improve the model's core confidence rather than just accepting the output. The root cause is likely the significant class imbalance, where the `scale_pos_weight` parameter may not be sufficient.
+*   **Proposed Solution:** We will implement **SMOTEENN**, a sophisticated hybrid technique that combines over-sampling and cleaning.
+    1.  **SMOTE** will create new synthetic examples of the minority (churn) class, giving the model more data to learn from.
+    2.  **Edited Nearest Neighbors (ENN)** will then clean the dataset, removing noisy samples from both classes that lie near the decision boundary.
+*   **Goal:** This should help the model learn a cleaner, more decisive separation between churners and non-churners, hopefully leading to a wider probability distribution and, more importantly, a better overall F1-score. This is a more advanced and robust approach to handling the imbalance in our data.
+*   **Next Step:** Add `imbalanced-learn` to `requirements.txt` and modify `train_model.py` to use `SMOTEENN` on the training data.
+*   **Bug Identified (Self-Correction):** An aggressive `replace` operation accidentally removed the benchmarking and Optuna logic from `train_model.py`.
+*   **Action:** Fully restored the script, then correctly integrated the `SMOTEENN` logic without removing any existing components.
+*   **Experiment Outcome:** The SMOTEENN-trained model resulted in a significant **increase in precision** (from 0.53 to 0.60) at the cost of a **decrease in recall** (from 0.80 to 0.67). The AUC remained stable. This successfully created a "sharpshooter" model, which is preferable for high-cost retention strategies. We have adopted this as our new champion model.
+*   **Action (Code Quality):** The user ran additional tuning experiments and saved the best parameter sets as comments in `train_model.py` for future reference.

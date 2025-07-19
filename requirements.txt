@@ -12,3 +12,4 @@ streamlit
 requests
 pydantic
 lifelines
+imbalanced-learn
