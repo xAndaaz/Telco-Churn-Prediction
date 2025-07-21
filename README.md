@@ -42,4 +42,7 @@ python -m churnadvisor.training.train_survival_model
     ```
 
 ---
+![Uploading screencapture-localhost-8501-2025-07-22-00_28_56.png…]()
+
+
 *For a detailed technical guide, including the project structure and data flow, please see `devReadme.md`.*
