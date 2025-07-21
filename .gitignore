@@ -3,5 +3,3 @@ shap-testing
 .venv
 __pycache__
 \"Dataset/survival_*.csv\"  
-commit_message.txt
-activity_log.md
