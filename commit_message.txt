@@ -1,7 +1,5 @@
-feat: Enhance dashboard with beeswarm plot and state management
+fix: Constrain SHAP plot width in dashboard
 
-- Replaced the SHAP summary bar plot with a more informative beeswarm plot to show feature impact, distribution, and correlation.
-- Resized the plot for a more compact and professional dashboard layout.
-- Refactored the entire dashboard application to use Streamlit's session state (`st.session_state`).
-- This prevents results from disappearing when the user interacts with other parts of the app, creating a more robust and persistent experience.
-- Updated all documentation (README.md, devReadme.md, activity_log.md) to reflect these significant dashboard enhancements.
+- Implemented a more robust method to control the SHAP plot's size in the dashboard.
+- The plot is now saved to a temporary PNG file and displayed using `st.image` with a fixed width parameter (`width=800`).
+- This replaces the previous `st.pyplot` call and prevents the plot from auto-expanding, ensuring a consistent and professional layout.

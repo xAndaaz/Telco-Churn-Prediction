@@ -250,3 +250,13 @@ This file logs the steps taken to improve the churn prediction model, the reason
     3.  Added logic to check the session state on every rerun and display any stored results.
 *   **Outcome:** The dashboard is now significantly more robust and user-friendly. Results from both the batch and single-customer analyses persist on the page, creating a seamless experience. The new beeswarm plot provides deeper analytical insight.
 
+### Final Dashboard Polish
+
+*   **User Report:** The plot resizing was still not working reliably.
+*   **Analysis:** Streamlit's `st.pyplot` can have unpredictable sizing behavior. A more robust method is to save the plot to a file and display it as a static image with a fixed width.
+*   **Action:**
+    1.  Modified the dashboard to save the generated Matplotlib figure to a temporary `shap_summary.png` file.
+    2.  Replaced the `st.pyplot(fig)` call with `st.image(plot_path, width=800)`.
+*   **Outcome:** This change provides direct, reliable control over the plot's width, ensuring a consistent and professional layout in the dashboard.
+*   **Next Step:** Beautify the dashboard's UI/UX to improve its visual appeal and professionalism.
+

@@ -111,10 +111,18 @@ if st.session_state['batch_results_df'] is not None:
         with open('Models/prepared_data.pkl', 'rb') as f:
             prepared_data = pickle.load(f)
         
-        fig, ax = plt.subplots(figsize=(10, 6))
+        # Generate the plot
+        plt.figure()
         shap.summary_plot(shap_values, prepared_data, plot_type="dot", show=False)
-        plt.tight_layout()
-        st.pyplot(fig)
+        
+        # Save the plot to a file
+        plot_path = 'shap_summary.png'
+        plt.savefig(plot_path, bbox_inches='tight', dpi=150)
+        plt.close() # Close the plot to free up memory
+
+        # Display the saved image with a fixed width
+        st.image(plot_path, width=900)
+
     except FileNotFoundError:
         st.warning("Could not generate SHAP summary plot. Required files not found.")
     except Exception as e:
