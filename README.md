@@ -42,4 +42,8 @@ python -m churnadvisor.training.train_survival_model
     ```
 
 ---
+
+<img width="2561" height="4547" alt="screencapture-localhost-8501-2025-07-22-00_28_56" src="https://github.com/user-attachments/assets/3bf5160c-90f4-4d4f-8f1e-03d5e646ae14" />
+
+
 *For a detailed technical guide, including the project structure and data flow, please see `devReadme.md`.*
