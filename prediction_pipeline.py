@@ -36,6 +36,14 @@ def run_prediction_pipeline(df):
     # Get SHAP explanations for top drivers
     explainer = shap.TreeExplainer(model)
     shap_values = explainer.shap_values(df_prepared)
+
+    # --- Save SHAP values and prepared data for dashboard summary plot ---
+    with open('Models/shap_values.pkl', 'wb') as f:
+        pickle.dump(shap_values, f)
+    with open('Models/prepared_data.pkl', 'wb') as f:
+        pickle.dump(df_prepared, f)
+    # --- End of new code ---
+
     shap_df = pd.DataFrame(shap_values, columns=df_prepared.columns)
     top_features = shap_df.abs().apply(lambda x: x.nlargest(5).index.tolist(), axis=1)
     

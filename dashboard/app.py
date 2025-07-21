@@ -5,6 +5,9 @@ import requests
 import json
 import sys
 import subprocess
+import pickle
+import matplotlib.pyplot as plt
+import shap
 
 # PAGE CONFIGURATION
 st.set_page_config(
@@ -79,7 +82,25 @@ if uploaded_file is not None:
                     file_name='master_retention_plan.csv',
                     mime='text/csv',
                 )
+
+                # --- NEW: Display SHAP Summary Plot ---
+                st.subheader("Top Churn Drivers (Overall)")
+                st.markdown("This plot shows the features that have the biggest impact on churn prediction across all customers in your uploaded file.")
                 
+                try:
+                    with open('Models/shap_values.pkl', 'rb') as f:
+                        shap_values = pickle.load(f)
+                    with open('Models/prepared_data.pkl', 'rb') as f:
+                        prepared_data = pickle.load(f)
+                    
+                    fig, ax = plt.subplots()
+                    shap.summary_plot(shap_values, prepared_data, plot_type="bar", show=False)
+                    st.pyplot(fig)
+                except FileNotFoundError:
+                    st.warning("Could not generate SHAP summary plot. Required files (`shap_values.pkl`, `prepared_data.pkl`) not found.")
+                except Exception as e:
+                    st.error(f"An error occurred while generating the SHAP plot: {e}")
+
             except subprocess.CalledProcessError as e:
                 st.error(f"An error occurred while running the pipeline: {e.stderr}")
             except FileNotFoundError:

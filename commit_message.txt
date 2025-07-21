@@ -1,7 +1,8 @@
-feat(analyzer): Enhance insight engine with protective factors
+feat: Add SHAP summary plot to dashboard
 
-- Upgraded the `churn_analyzer.py` to be more comprehensive and intelligent.
-- The engine now includes logic to identify and report on "protective factors," where a feature's value positively contributes to a customer's loyalty.
-- Added more insight rules to cover a wider range of churn drivers.
-- Increased the number of SHAP drivers used from 3 to 5 across all pipelines for a deeper analysis.
-- Fixed a data type bug that caused poor formatting in fallback messages.
+- Implemented a SHAP summary plot in the Streamlit dashboard.
+- The plot is displayed after a batch prediction analysis, showing the overall feature importance for the uploaded dataset.
+- Modified the prediction pipeline to save the necessary SHAP values and prepared data for the plot.
+- Updated the dashboard to load these files and generate the plot using matplotlib.
+- Fixed a bug in the dashboard where the real-time prediction form was broken.
+- Updated README.md, devReadme.md, and activity_log.md to reflect these changes.

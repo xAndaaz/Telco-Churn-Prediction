@@ -83,7 +83,7 @@ The entire system is orchestrated by the Streamlit dashboard, which executes the
 ### `dashboard/app.py`
 **Purpose:** The user-facing interface for the entire system.
 *   **Key Logic:**
-    *   **Batch Processing:** Provides a file uploader that triggers a `subprocess` call to run the entire sequence of pipelines, displaying the final unified result.
+    *   **Batch Processing:** Provides a file uploader that triggers a `subprocess` call to run the entire sequence of pipelines. After execution, it loads the final results, displays the risk profile table, and generates a **SHAP summary plot** by loading serialized SHAP values and data from the prediction pipeline.
     *   **Real-time Analysis:** Includes a form for single-customer data entry, which calls the `/predict` endpoint on the FastAPI and displays the top 5 key churn drivers and a generated insight.
 
 ---

@@ -217,3 +217,25 @@ This file logs the steps taken to improve the churn prediction model, the reason
     3.  Increased the number of SHAP drivers used from 3 to 5 in all pipelines (`prediction_pipeline.py` and `api/main.py`) to provide a deeper analysis.
 *   **Outcome:** The insight engine is now highly robust, comprehensive, and intelligent, providing a truly professional-grade analysis for each at-risk customer.
 
+---
+
+## 2025-07-21
+
+### Documentation Update & Next Steps
+
+*   **User Insight:** The user correctly identified that the `README.md` and `devReadme.md` files were out of sync with the latest project advancements, specifically the context-aware insight engine and the increase to 5 SHAP drivers.
+*   **Action:** Updated both `README.md` and `devReadme.md` to accurately reflect the current state of the project. This included updating version numbers, feature descriptions, and data flow diagrams.
+*   **Action (Git):** Committed the documentation changes to the repository to establish a new, accurate baseline.
+*   **Next Step:** Implement a SHAP summary plot in the Streamlit dashboard. When a user runs a batch prediction, a summary plot will be generated and displayed alongside the results table, providing a high-level overview of the most impactful features for that cohort. This will further enhance the dashboard's analytical capabilities.
+
+### Dashboard SHAP Summary Plot
+
+*   **User Request:** The user requested the addition of a SHAP summary plot to the dashboard's batch analysis output.
+*   **Action Plan:**
+    1.  Modify `prediction_pipeline.py` to save the calculated `shap_values` and the `prepared_data` DataFrame, as both are required to generate a summary plot.
+    2.  Update `dashboard/app.py` to load these new artifacts after the pipelines run.
+    3.  Use `matplotlib` and `shap.summary_plot` to generate and display the plot in the Streamlit interface.
+*   **Bug Identified (Self-Correction):** An aggressive `replace` operation inadvertently truncated the `dashboard/app.py` file, breaking the real-time prediction form.
+*   **Action:** Identified the error and restored the missing code block, fixing the bug and ensuring all dashboard functionality was operational.
+*   **Outcome:** The dashboard now successfully displays a SHAP summary bar plot after a batch analysis run, providing valuable high-level insights into feature importance for the entire analyzed dataset.
+
