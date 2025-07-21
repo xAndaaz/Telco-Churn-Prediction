@@ -1,28 +1,48 @@
-# Developer's Guide: Customer Churn Prediction Project
+# Developer's Guide: ChurnAdvisor Project
 
-**Version: 4.1**
+**Version: 5.0**
 
 ## 1. Project Philosophy: The Advisory Approach
-
 This document is the definitive technical guide for developers.
-
-The system's goal is to create an **advisory intelligence tool**. We do not prescribe specific business actions. Instead, we provide a complete, data-driven workflow that generates a rich **Churn Risk Profile** for each customer. This profile empowers business users with a deep understanding of the *'if'*, *'why'*, and *'when'* of churn risk, allowing them to formulate the best retention strategies based on their own domain knowledge and resources.
-
----
-
-## 2. Core Concepts & Key Technologies
-
-*   **XGBRFClassifier:** A Random Forest variant from the XGBoost library. It was chosen as our core classification model after a data-driven benchmarking process showed it had the best baseline performance.
-*   **SMOTEENN:** A sophisticated hybrid sampling technique used to address the class imbalance in the dataset. It combines SMOTE (over-sampling) with ENN (cleaning), which resulted in a high-precision model that is more reliable for high-cost retention scenarios.
-*   **Context-Aware XAI:** The foundation of our "Explainable AI". We use `shap.TreeExplainer` to calculate the impact of the **top 5 features** on the final prediction. These "SHAP drivers" are then fed into our custom-built `churn_analyzer.py` module, which generates factually consistent, context-aware insights.
-*   **Survival Analysis (CoxPH Model):** A statistical method that models the *time-to-event*. We use the `lifelines` library's `CoxPHFitter` to predict *when* a customer is likely to churn, providing a time-based risk dimension.
-*   **Quantile-Based Tiering:** A robust method for segmenting at-risk customers. Instead of using fixed probability thresholds, we rank churners by their probability score and group them into "High", "Medium", and "Low" risk tiers based on their percentile. This adapts to the model's probability distribution.
-*   **Centralized Logic:** All feature creation is centralized in `feature_engineering.py`, and all data preparation is handled by `data_processing.py` to prevent training-serving skew.
+The system's goal is to create an **advisory intelligence tool**. We do not prescribe specific business actions. Instead, we provide a complete, data-driven workflow that generates a rich **Churn Risk Profile** for each customer.
 
 ---
 
-## 3. The Unified Data Flow
+## 2. Project Structure
+The project follows a standard Python package structure to ensure maintainability and scalability.
 
+```
+├── churnadvisor/            # Main source code as an installable package
+│   ├── __init__.py
+│   ├── analysis/            # Core analysis logic (e.g., insight generation)
+│   ├── pipelines/           # Scripts that orchestrate prediction steps
+│   ├── processing/          # Data cleaning, preparation, and feature engineering
+│   └── training/            # Model training and tuning scripts
+│
+├── api/                     # FastAPI application
+├── dashboard/               # Streamlit dashboard application
+├── scripts/                 # Standalone or one-off analysis scripts
+│
+├── Dataset/                 # Raw and processed data
+├── Models/                  # Trained model artifacts
+│
+├── devReadme.md             # This developer guide
+├── README.md                # Main project README
+└── requirements.txt         # Project dependencies
+```
+
+---
+
+## 3. Core Concepts & Key Technologies
+*   **XGBRFClassifier:** Our core classification model, chosen after a data-driven benchmarking process.
+*   **SMOTEENN:** A hybrid sampling technique used to address class imbalance.
+*   **Context-Aware XAI:** We use `shap.TreeExplainer` to find the **top 5 SHAP drivers**, which are then fed into our custom `churnadvisor.analysis.churn_analyzer` module to generate factually consistent insights.
+*   **Survival Analysis (CoxPH Model):** We use the `lifelines` library to model the *time-to-event* for churn.
+*   **Absolute Paths & Imports:** All scripts within the `churnadvisor` package use absolute paths constructed from the project root and absolute package imports (e.g., `from churnadvisor.processing import ...`) to ensure they can be run and imported reliably from any context.
+
+---
+
+## 4. The Unified Data Flow
 The entire system is orchestrated by the Streamlit dashboard, which executes the pipelines in sequence.
 
 ```
@@ -31,62 +51,34 @@ The entire system is orchestrated by the Streamlit dashboard, which executes the
            v
 [dashboard/app.py] --> Saves to [Dataset/temp_uploaded_data.csv]
            |
-           +-----------------------------------------------------------------+
-           |                                                                 |
-           v (Executes)                                                      v (Executes)
-[1. prediction_pipeline.py]                                       [2. survival_prediction_pipeline.py]
-   - Loads temp data                                                 - Loads temp data
-   - Predicts churn & Top 5 SHAP drivers                             - Predicts survival probabilities
-   - SAVES --> [Dataset/retention_candidates.csv]                    - SAVES --> [Dataset/survival_predictions.csv]
-           |                                                                 |
-           |                                                                 v (Executes)
-           |                                                      [3. survival_risk_analyzer.py]
-           |                                                         - Loads survival_predictions.csv
-           |                                                         - Assigns time-based risk tiers
-           |                                                         - SAVES --> [Dataset/survival_risk_analysis.csv]
-           |                                                                 |
-           +------------------------+----------------------------------------+
-                                    |
-                                    v (Executes)
-                       [4. master_retention_pipeline.py]
-                          - Loads retention_candidates.csv
-                          - Loads survival_risk_analysis.csv
-                          - Merges the data
-                          - Applies quantile-based tiering
-                          - Calls [churn_analyzer.py] to generate insights
-                          - SAVES --> [Dataset/master_retention_plan.csv]
-                                    |
-                                    v
-                       [dashboard/app.py] --> Loads and displays the final result
+           v (Executes)
+[churnadvisor/pipelines/prediction_pipeline.py]
+           |
+           v (Executes)
+[churnadvisor/pipelines/survival_prediction_pipeline.py]
+           |
+           v (Executes)
+[churnadvisor/pipelines/survival_risk_analyzer.py]
+           |
+           v (Executes)
+[churnadvisor/pipelines/master_retention_pipeline.py]
+           |
+           v
+[dashboard/app.py] --> Loads and displays the final result
 ```
 
 ---
 
-## 4. Deep Dive into Code Components
+## 5. Deep Dive into Code Components
 
-### `train_model.py`
+### `churnadvisor/training/train_model.py`
 **Purpose:** To perform a rigorous, data-driven process of model selection, tuning, and training.
-*   **Key Logic:**
-    1.  **Benchmarking:** Compares several baseline models and saves the results to `experiments.json`.
-    2.  **Imbalance Handling:** Applies **SMOTEENN** to the training set to create a balanced and clean dataset for the model.
-    3.  **Hyperparameter Tuning:** Uses **Optuna** to find the optimal hyperparameters for the `XGBRFClassifier`.
-    4.  **Serialization:** Saves the final trained model (`model.pkl`) and other assets.
 
-### `churn_analyzer.py`
+### `churnadvisor/analysis/churn_analyzer.py`
 **Purpose:** The "translation layer" between the technical model outputs and the business user. This is the core of our context-aware insight engine.
-*   **Key Logic:** The `generate_actionable_insight` function takes the top 5 SHAP drivers and cross-references them with the customer's actual data. This allows it to generate factually consistent insights, correctly identifying not just risk factors but also "protective factors" (e.g., "Their subscription to Tech Support is a significant positive factor..."). It is designed to be robust and avoid making nonsensical statements.
-
-### `master_retention_pipeline.py`
-**Purpose:** The central orchestrator that creates the final Churn Risk Profile.
-*   **Key Logic:** Merges the outputs of the classification and survival pipelines, applies quantile-based risk tiering, and uses the `churn_analyzer` to create the final `ActionableInsight` column.
 
 ### `dashboard/app.py`
-**Purpose:** The user-facing interface for the entire system.
-*   **Key Logic:**
-    *   **State Management:** The entire application is built using **Streamlit's Session State** (`st.session_state`). This ensures a persistent user experience, where results from one part of the app (e.g., batch analysis) are not lost when the user interacts with another part (e.g., real-time analysis).
-    *   **Batch Processing:** Provides a file uploader that triggers a `subprocess` call to run the entire sequence of pipelines. The final results are stored in the session state and displayed. This section also generates a **SHAP beeswarm plot** for global feature analysis.
-    *   **Real-time Analysis:** Includes a form for single-customer data entry. The API response is stored in the session state and displayed, preserving the result across reruns.
+**Purpose:** The user-facing interface for the entire system. It uses `st.session_state` for a persistent UI and calls the pipeline scripts using `subprocess`.
 
 ---
-
 This guide should provide all the necessary details to understand, maintain, and extend the project. Welcome aboard!

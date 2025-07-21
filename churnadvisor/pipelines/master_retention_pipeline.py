@@ -1,6 +1,14 @@
 import pandas as pd
+import os
+import sys
 
-from churn_analyzer import generate_actionable_insight
+# Add the project root to the Python path
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
+
+from churnadvisor.analysis.churn_analyzer import generate_actionable_insight
+
+# Define the project root to construct absolute paths
+PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
 
 def generate_churn_risk_profiles():
     """
@@ -9,10 +17,12 @@ def generate_churn_risk_profiles():
     """
     print("--- Starting Unified Churn Risk Profile Generation ---")
 
-    # 1. Load the data from the two pipelines
+    # 1. Load the data from the two pipelines using absolute paths
     try:
-        classification_results = pd.read_csv('Dataset/retention_candidates.csv')
-        survival_results = pd.read_csv('Dataset/survival_risk_analysis.csv')
+        classification_results_path = os.path.join(PROJECT_ROOT, 'Dataset', 'retention_candidates.csv')
+        survival_results_path = os.path.join(PROJECT_ROOT, 'Dataset', 'survival_risk_analysis.csv')
+        classification_results = pd.read_csv(classification_results_path)
+        survival_results = pd.read_csv(survival_results_path)
         print("Successfully loaded data from classification and survival pipelines.")
     except FileNotFoundError as e:
         print(f"Error: Could not find input file. {e}")
@@ -58,7 +68,7 @@ def generate_churn_risk_profiles():
     final_df = final_df[cols_to_front + other_cols]
     
     # 6. Save the final output
-    output_path = 'Dataset/master_retention_plan.csv'
+    output_path = os.path.join(PROJECT_ROOT, 'Dataset', 'master_retention_plan.csv')
     final_df.to_csv(output_path, index=False)
     print(f"\nProcess complete. Unified Churn Risk Profiles saved to '{output_path}'")
     

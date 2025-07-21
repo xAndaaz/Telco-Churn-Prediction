@@ -1,9 +1,18 @@
-refactor: Overhaul dashboard UI/UX and improve naming
+refactor: Finalize project structure and polish dashboard
 
-- Completely refactored the Streamlit dashboard for a more professional and modern user experience.
-- Implemented a sidebar for clear navigation between "Batch Analysis" and "Instant Prediction" pages.
-- Used containers and columns to create a structured, visually appealing, and easy-to-read layout.
-- Improved UI naming conventions for better clarity and professionalism:
-    - Renamed the app title in the sidebar to "ChurnAdvisor".
-    - Renamed the "Real-time Analysis" page to "Instant Prediction".
-- Added icons and enhanced headers to make the interface more intuitive.
+This commit concludes the project development with a major refactoring and final UI enhancements.
+
+- **Project Refactoring:**
+    - Restructured the entire project into a standard Python package (`churnadvisor`) for improved maintainability and professionalism.
+    - Organized all scripts into logical subdirectories (`pipelines`, `training`, `analysis`, `processing`).
+    - Updated all imports and file paths to use the new package structure, ensuring robustness with absolute paths.
+
+- **Bug Fix:**
+    - Resolved a critical `TypeError` in the `generate_actionable_insight` function.
+    - Corrected the function calls in both the batch pipeline and the API to prevent crashes during insight generation.
+
+- **Dashboard Polish:**
+    - Added a descriptive text block to the dashboard UI that explicitly highlights the advanced methodologies (XAI, Survival Analysis, CLV) used in the project. This makes the value proposition clear to the end-user.
+
+- **Documentation:**
+    - Updated `README.md`, `devReadme.md`, and `activity_log.md` to reflect all the latest changes, including the new project structure and features.

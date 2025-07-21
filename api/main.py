@@ -7,9 +7,10 @@ import uvicorn
 import sys
 import os
 
-# Add the parent directory to the path to allow importing from the root folder
+# Add the project root to the path to allow importing `churnadvisor`
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-from data_processing import prepare_data_for_prediction
+from churnadvisor.processing.data_processing import prepare_data_for_prediction
+from churnadvisor.analysis.churn_analyzer import generate_actionable_insight
 
 # --- 1. SETUP ---
 # Load model and explainer at startup
@@ -74,11 +75,21 @@ def predict_churn(customer_data: CustomerData):
     
     shap_df = pd.DataFrame(shap_values, columns=df_prepared.columns)
     top_drivers = shap_df.abs().iloc[0].nlargest(5).index.tolist()
+
+    # To generate a context-aware insight, we need to combine the original
+    # customer data with the prediction results into a single Series.
+    customer_profile = df.iloc[0].copy()
+    customer_profile['churn_prediction'] = prediction
+    customer_profile['churn_probability'] = probability
+    customer_profile['top_churn_drivers'] = top_drivers
     
+    insight = generate_actionable_insight(customer_profile)
+
     return {
         "churn_prediction": int(prediction),
         "churn_probability": float(probability),
-        "top_churn_drivers": top_drivers
+        "top_churn_drivers": top_drivers,
+        "actionable_insight": insight
     }
 
 # 5. MAIN EXECUTION (for local testing)

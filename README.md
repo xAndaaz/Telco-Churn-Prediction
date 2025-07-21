@@ -1,57 +1,37 @@
-# Customer Churn Prediction & Risk Analysis
+# ChurnAdvisor: Customer Churn Prediction & Risk Analysis
 
 ## Project Overview
+**ChurnAdvisor** is an end-to-end machine learning application that identifies at-risk customers and generates a holistic **Churn Risk Profile** for each one. Instead of prescribing generic actions, this tool provides a rich, multi-faceted advisory report that empowers business users to make informed, data-driven retention decisions.
 
-This project demonstrates an end-to-end machine learning workflow for identifying at-risk customers and generating a holistic **Churn Risk Profile** for each one. Instead of prescribing specific retention strategies, this tool provides a rich, multi-faceted advisory report that empowers business users to make informed decisions.
-
-The solution uses a Telco Customer Churn dataset to train two powerful models:
-1.  An **XGBRFClassifier** to predict the *likelihood* and identify the key *drivers* of churn.
-2.  A **Cox Proportional Hazards** model for survival analysis to predict *when* a customer is likely to churn.
-
-These outputs are then unified into a single, actionable Churn Risk Profile, which is made available through an interactive Streamlit dashboard and a high-performance FastAPI.
+The solution uses a Telco Customer Churn dataset to train and serve a dual-model system, made available through a polished Streamlit dashboard and a high-performance FastAPI.
 
 ---
 
 ## Key Features
-
-*   **Dual-Model System:** Combines a high-precision classification model (XGBRFClassifier) with a sophisticated survival analysis model to answer not just *if* a customer will churn, but also *why* and *when*.
-*   **Advanced Imbalance Handling:** Uses **SMOTEENN**, a hybrid sampling technique, to create a high-precision model that is more reliable for high-cost retention scenarios.
-*   **Context-Aware Insight Engine:** A sophisticated `churn_analyzer.py` module that goes beyond basic XAI. It intelligently interprets the model's outputs in the context of each customer's actual data to generate factually consistent, actionable insights. It can even identify "protective factors" (e.g., why a customer *isn't* churning).
-*   **Deep Explainability (XAI):** Integrates **SHAP** to identify the top 5 drivers of churn for each individual customer, providing clear, deep, and actionable reasons for the model's predictions.
-*   **Unified Churn Risk Profile:** A master pipeline that synthesizes all model outputs (churn probability, SHAP drivers, time-based risk, CLV) into a single, human-readable advisory report.
-*   **Robust Interactive Dashboard:** A user-friendly Streamlit application built with state management (`st.session_state`) to provide a persistent and seamless user experience. It features:
-    *   Real-time single-customer analysis.
-    *   Batch processing of entire customer lists.
-    *   An advanced **SHAP Beeswarm Plot** to visualize global feature impact and relationships.
-*   **Production-Ready API:** A high-performance FastAPI endpoint serves the core classification model, with critical components like the SHAP explainer pre-loaded for low-latency responses.
-
----
-
-## The Unified Workflow
-
-The project's core is the `master_retention_pipeline.py`, which orchestrates the following steps:
-
-1.  **Classification Analysis (`prediction_pipeline.py`):** Predicts churn probability and SHAP drivers.
-2.  **Survival Analysis (`survival_risk_analyzer.py`):** Assigns a categorical, time-based risk tier ("Urgent", "Medium Risk", etc.).
-3.  **Churn Risk Profile Generation (`master_retention_pipeline.py`):** Merges the outputs and uses the `churn_analyzer.py` module to translate the technical model outputs into a human-readable **Actionable Insight**.
+*   **Professional Project Structure:** All code is organized into a standard, maintainable Python package (`churnadvisor`).
+*   **Dual-Model System:** Combines a high-precision **XGBRFClassifier** (to predict *if* and *why*) with a **Cox Proportional Hazards** survival model (to predict *when*).
+*   **Context-Aware Insight Engine:** A sophisticated analysis module that intelligently interprets model outputs (SHAP drivers) in the context of each customer's actual data to generate factually consistent, actionable insights.
+*   **Robust Interactive Dashboard:** A user-friendly Streamlit application (`ChurnAdvisor`) built with state management for a seamless experience. It features:
+    *   **Instant Prediction:** Real-time analysis for a single customer.
+    *   **Batch Analysis:** Bulk processing of customer lists from a CSV file.
+    *   **Advanced Visualization:** An interactive SHAP beeswarm plot to visualize global feature impact.
+*   **Production-Ready API:** A high-performance FastAPI endpoint serves the core classification model with low latency.
 
 ---
 
 ## How to Run the Project
 
 ### 1. Train the Models
-First, you need to train the classification and survival models.
+Execute the training scripts from the project's root directory:
 ```bash
-# Train the classification model (XGBRFClassifier)
-python train_model.py
+# Train the classification model
+python -m churnadvisor.training.train_model
 
-# Train the survival model (CoxPH)
-python train_survival_model.py
+# Train the survival model
+python -m churnadvisor.training.train_survival_model
 ```
 
 ### 2. Launch the API and Dashboard
-To interact with the system, you need to run both the FastAPI server and the Streamlit dashboard.
-
 *   **First, start the API in one terminal:**
     ```bash
     python api/main.py
@@ -61,9 +41,5 @@ To interact with the system, you need to run both the FastAPI server and the Str
     streamlit run dashboard/app.py
     ```
 
-### 3. Use the Dashboard
-*   **Real-time Analysis:** Fill in a customer's details to get an instant Churn Risk Profile.
-*   **Batch Analysis:** Upload a CSV of customers and click "Generate Churn Risk Profiles" to run the entire unified pipeline and download the results.
-
 ---
-*For a more detailed technical guide, including data flow diagrams and code component deep dives, please see `devReadme.md`.*
+*For a detailed technical guide, including the project structure and data flow, please see `devReadme.md`.*
