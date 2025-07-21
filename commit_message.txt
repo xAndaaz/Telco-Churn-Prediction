@@ -1,5 +1,9 @@
-fix: Constrain SHAP plot width in dashboard
+refactor: Overhaul dashboard UI/UX and improve naming
 
-- Implemented a more robust method to control the SHAP plot's size in the dashboard.
-- The plot is now saved to a temporary PNG file and displayed using `st.image` with a fixed width parameter (`width=800`).
-- This replaces the previous `st.pyplot` call and prevents the plot from auto-expanding, ensuring a consistent and professional layout.
+- Completely refactored the Streamlit dashboard for a more professional and modern user experience.
+- Implemented a sidebar for clear navigation between "Batch Analysis" and "Instant Prediction" pages.
+- Used containers and columns to create a structured, visually appealing, and easy-to-read layout.
+- Improved UI naming conventions for better clarity and professionalism:
+    - Renamed the app title in the sidebar to "ChurnAdvisor".
+    - Renamed the "Real-time Analysis" page to "Instant Prediction".
+- Added icons and enhanced headers to make the interface more intuitive.
