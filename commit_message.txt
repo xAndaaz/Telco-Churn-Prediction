@@ -1,8 +1,0 @@
-feat: Implement final master-detail UI for dashboard results
-
-- Implemented a professional master-detail interface for the batch analysis results to solve the issue of displaying long text insights.
-- The UI now features a compact, scrollable `st.dataframe` showing a summary of at-risk customers.
-- A `st.selectbox` allows the user to choose a specific customer from the table.
-- The full, unabridged `ActionableInsight` for the selected customer is then displayed in a dedicated detail view, clearly labeled with the `customerID`.
-- This provides a scalable and highly user-friendly interface that balances a clean overview with accessible, on-demand details.
-- Updated all documentation (`activity_log.md`, `devReadme.md`) to reflect this final UI enhancement.
