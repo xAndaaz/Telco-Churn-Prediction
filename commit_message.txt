@@ -1,8 +1,7 @@
-feat: Add SHAP summary plot to dashboard
+feat: Enhance dashboard with beeswarm plot and state management
 
-- Implemented a SHAP summary plot in the Streamlit dashboard.
-- The plot is displayed after a batch prediction analysis, showing the overall feature importance for the uploaded dataset.
-- Modified the prediction pipeline to save the necessary SHAP values and prepared data for the plot.
-- Updated the dashboard to load these files and generate the plot using matplotlib.
-- Fixed a bug in the dashboard where the real-time prediction form was broken.
-- Updated README.md, devReadme.md, and activity_log.md to reflect these changes.
+- Replaced the SHAP summary bar plot with a more informative beeswarm plot to show feature impact, distribution, and correlation.
+- Resized the plot for a more compact and professional dashboard layout.
+- Refactored the entire dashboard application to use Streamlit's session state (`st.session_state`).
+- This prevents results from disappearing when the user interacts with other parts of the app, creating a more robust and persistent experience.
+- Updated all documentation (README.md, devReadme.md, activity_log.md) to reflect these significant dashboard enhancements.

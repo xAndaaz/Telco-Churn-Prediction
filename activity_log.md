@@ -239,3 +239,14 @@ This file logs the steps taken to improve the churn prediction model, the reason
 *   **Action:** Identified the error and restored the missing code block, fixing the bug and ensuring all dashboard functionality was operational.
 *   **Outcome:** The dashboard now successfully displays a SHAP summary bar plot after a batch analysis run, providing valuable high-level insights into feature importance for the entire analyzed dataset.
 
+### Dashboard Polish and State Management
+
+*   **User Insight:** The user noted that the SHAP bar plot was too large and that clicking any button on the dashboard (like "Download CSV") caused all previous results to disappear.
+*   **Analysis:** This is the default behavior of Streamlit, which reruns the entire script on every user interaction. The solution is to implement state management.
+*   **Action (Plot Improvement):** Replaced the SHAP bar plot with a more informative and visually appealing **beeswarm plot**. The plot size was also fixed to ensure a more compact and professional layout.
+*   **Action (State Management):** Refactored the entire `dashboard/app.py` script to use **Streamlit's Session State** (`st.session_state`).
+    1.  Initialized session state variables to hold the results of the batch and single-customer analyses.
+    2.  Modified the pipeline and API call logic to save their outputs to the session state instead of just displaying them.
+    3.  Added logic to check the session state on every rerun and display any stored results.
+*   **Outcome:** The dashboard is now significantly more robust and user-friendly. Results from both the batch and single-customer analyses persist on the page, creating a seamless experience. The new beeswarm plot provides deeper analytical insight.
+

@@ -19,7 +19,10 @@ These outputs are then unified into a single, actionable Churn Risk Profile, whi
 *   **Context-Aware Insight Engine:** A sophisticated `churn_analyzer.py` module that goes beyond basic XAI. It intelligently interprets the model's outputs in the context of each customer's actual data to generate factually consistent, actionable insights. It can even identify "protective factors" (e.g., why a customer *isn't* churning).
 *   **Deep Explainability (XAI):** Integrates **SHAP** to identify the top 5 drivers of churn for each individual customer, providing clear, deep, and actionable reasons for the model's predictions.
 *   **Unified Churn Risk Profile:** A master pipeline that synthesizes all model outputs (churn probability, SHAP drivers, time-based risk, CLV) into a single, human-readable advisory report.
-*   **Interactive Dashboard:** A user-friendly Streamlit application for both real-time single-customer analysis and batch processing of entire customer lists, complete with a **SHAP Summary Plot** to visualize global feature importance.
+*   **Robust Interactive Dashboard:** A user-friendly Streamlit application built with state management (`st.session_state`) to provide a persistent and seamless user experience. It features:
+    *   Real-time single-customer analysis.
+    *   Batch processing of entire customer lists.
+    *   An advanced **SHAP Beeswarm Plot** to visualize global feature impact and relationships.
 *   **Production-Ready API:** A high-performance FastAPI endpoint serves the core classification model, with critical components like the SHAP explainer pre-loaded for low-latency responses.
 
 ---
