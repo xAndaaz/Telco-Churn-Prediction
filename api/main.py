@@ -56,7 +56,7 @@ def predict_churn(customer_data: CustomerData):
     Predicts churn for a single customer.
     
     Accepts customer data, processes it, and returns the churn prediction,
-    probability, and top 3 churn drivers.
+    probability, and top 5 churn drivers.
     """
     # Convert input data to a pandas DataFrame
     df = pd.DataFrame([customer_data.dict()])
@@ -73,7 +73,7 @@ def predict_churn(customer_data: CustomerData):
     shap_values = explainer.shap_values(df_prepared)
     
     shap_df = pd.DataFrame(shap_values, columns=df_prepared.columns)
-    top_drivers = shap_df.abs().iloc[0].nlargest(3).index.tolist()
+    top_drivers = shap_df.abs().iloc[0].nlargest(5).index.tolist()
     
     return {
         "churn_prediction": int(prediction),

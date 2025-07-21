@@ -207,3 +207,12 @@ This file logs the steps taken to improve the churn prediction model, the reason
 *   **Rationale:** To be truly professional, the insights must be factually consistent with the customer's actual data.
 *   **Action:** The `generate_actionable_insight` function was completely refactored. It now checks both the SHAP driver *and* the customer's corresponding data value to generate a contextually accurate insight. It can now correctly identify "protective factors" (e.g., "Their subscription to Tech Support is a significant positive factor...").
 *   **Outcome:** The project's final output is now not only unified but also intelligent and accurate, dramatically increasing its quality and reliability.
+
+### Final Insight Engine Polish
+
+*   **User Insight:** The user identified that the insight engine was still not comprehensive enough and produced a poorly formatted fallback message for unmapped drivers.
+*   **Action:** Upgraded the `churn_analyzer.py` script one last time:
+    1.  Fixed the data type bug by using `ast.literal_eval` to correctly parse the list of SHAP drivers.
+    2.  Added more comprehensive, context-aware insight rules, including logic to identify and report on "protective factors" where a feature's absence is a positive sign.
+    3.  Increased the number of SHAP drivers used from 3 to 5 in all pipelines (`prediction_pipeline.py` and `api/main.py`) to provide a deeper analysis.
+*   **Outcome:** The insight engine is now highly robust, comprehensive, and intelligent, providing a truly professional-grade analysis for each at-risk customer.

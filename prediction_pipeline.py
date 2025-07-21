@@ -37,7 +37,7 @@ def run_prediction_pipeline(df):
     explainer = shap.TreeExplainer(model)
     shap_values = explainer.shap_values(df_prepared)
     shap_df = pd.DataFrame(shap_values, columns=df_prepared.columns)
-    top_features = shap_df.abs().apply(lambda x: x.nlargest(3).index.tolist(), axis=1)
+    top_features = shap_df.abs().apply(lambda x: x.nlargest(5).index.tolist(), axis=1)
     
     # Combine results into a single DataFrame
     results = df.copy()

@@ -1,6 +1,7 @@
-refactor(analyzer): Implement context-aware insight engine
+feat(analyzer): Enhance insight engine with protective factors
 
-- Refactored the `churn_analyzer.py` module to be "context-aware."
-- The insight generation logic now validates SHAP drivers against the customer's actual data, ensuring all insights are factually correct.
-- This new engine can correctly identify both risk factors (e.g., having a month-to-month contract) and protective factors (e.g., having tech support when other risks are high).
-- This change dramatically improves the accuracy, intelligence, and professional quality of the final Churn Risk Profile.
+- Upgraded the `churn_analyzer.py` to be more comprehensive and intelligent.
+- The engine now includes logic to identify and report on "protective factors," where a feature's value positively contributes to a customer's loyalty.
+- Added more insight rules to cover a wider range of churn drivers.
+- Increased the number of SHAP drivers used from 3 to 5 across all pipelines for a deeper analysis.
+- Fixed a data type bug that caused poor formatting in fallback messages.
