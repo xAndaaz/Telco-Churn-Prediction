@@ -1,13 +1,25 @@
 # ChurnAdvisor: Customer Churn Prediction & Risk Analysis
 
-## Project Overview
-**ChurnAdvisor** is an end-to-end machine learning application that identifies at-risk customers and generates a holistic **Churn Risk Profile** for each one. Instead of prescribing generic actions, this tool provides a rich, multi-faceted advisory report that empowers business users to make informed, data-driven retention decisions.
+![MIT License](https://img.shields.io/badge/License-MIT-green.svg)
+[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](YOUR_STREAMLIT_APP_URL_HERE)
 
-The solution uses a Telco Customer Churn dataset to train and serve a dual-model system, made available through a polished Streamlit dashboard and a high-performance FastAPI.
+**ChurnAdvisor** is an end-to-end machine learning application that identifies at-risk customers and generates a holistic **Churn Risk Profile** for each one. Instead of prescribing generic actions, this tool provides a rich, multi-faceted advisory report that empowers business users to make informed, data-driven retention decisions.
 
 ---
 
-## Key Features
+## 🚀 Live Demo & Preview
+
+**[➡️ View the Live Application on Streamlit Community Cloud](YOUR_STREAMLIT_APP_URL_HERE)**
+
+*(Please replace the link above with your actual Streamlit deployment URL.)*
+
+![ChurnAdvisor GIF Demo](https://github.com/user-attachments/assets/YOUR_GIF_ASSET_URL_HERE)
+*(**Recommendation:** Create a short, high-quality GIF showcasing the app's workflow—uploading a file, viewing the results, and using the Instant Prediction—and replace the link above.)*
+
+---
+
+## ✨ Key Features
+
 *   **Professional Project Structure:** All code is organized into a standard, maintainable Python package (`churnadvisor`).
 *   **Dual-Model System:** Combines a high-precision **XGBRFClassifier** (to predict *if* and *why*) with a **Cox Proportional Hazards** survival model (to predict *when*).
 *   **Context-Aware Insight Engine:** A sophisticated analysis module that intelligently interprets model outputs (SHAP drivers) in the context of each customer's actual data to generate factually consistent, actionable insights.
@@ -19,9 +31,35 @@ The solution uses a Telco Customer Churn dataset to train and serve a dual-model
 
 ---
 
-## How to Run the Project
+## 🛠️ Tech Stack
 
-### 1. Train the Models
+*   **Language:** Python
+*   **Frontend:** Streamlit
+*   **API:** FastAPI, Uvicorn
+*   **Core ML Libraries:** Scikit-learn, XGBoost, Lifelines (for Survival Analysis), Imbalanced-learn
+*   **Explainable AI (XAI):** SHAP
+*   **Data Manipulation:** Pandas, NumPy
+*   **Visualization:** Matplotlib, Seaborn
+
+---
+
+## ⚙️ How to Run Locally
+
+### 1. Clone the Repository
+```bash
+git clone https://github.com/YOUR_USERNAME/YOUR_REPOSITORY.git
+cd YOUR_REPOSITORY
+```
+
+### 2. Set Up the Environment
+It is recommended to use a virtual environment.
+```bash
+python -m venv .venv
+source .venv/bin/activate  # On Windows, use: .venv\Scripts\activate
+pip install -r requirements.txt
+```
+
+### 3. Train the Models
 Execute the training scripts from the project's root directory:
 ```bash
 # Train the classification model
@@ -31,7 +69,7 @@ python -m churnadvisor.training.train_model
 python -m churnadvisor.training.train_survival_model
 ```
 
-### 2. Launch the API and Dashboard
+### 4. Launch the Application
 *   **First, start the API in one terminal:**
     ```bash
     python api/main.py
@@ -43,7 +81,8 @@ python -m churnadvisor.training.train_survival_model
 
 ---
 
-<img width="2561" height="4547" alt="screencapture-localhost-8501-2025-07-22-00_28_56" src="https://github.com/user-attachments/assets/3bf5160c-90f4-4d4f-8f1e-03d5e646ae14" />
+## 📄 License
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
 
-
+---
 *For a detailed technical guide, including the project structure and data flow, please see `devReadme.md`.*
