@@ -1,6 +1,6 @@
 # Developer's Guide: Customer Churn Prediction Project
 
-**Version: 4.0**
+**Version: 4.1**
 
 ## 1. Project Philosophy: The Advisory Approach
 
@@ -14,7 +14,7 @@ The system's goal is to create an **advisory intelligence tool**. We do not pres
 
 *   **XGBRFClassifier:** A Random Forest variant from the XGBoost library. It was chosen as our core classification model after a data-driven benchmarking process showed it had the best baseline performance.
 *   **SMOTEENN:** A sophisticated hybrid sampling technique used to address the class imbalance in the dataset. It combines SMOTE (over-sampling) with ENN (cleaning), which resulted in a high-precision model that is more reliable for high-cost retention scenarios.
-*   **SHAP (SHapley Additive exPlanations):** The foundation of our "Explainable AI" (XAI). We use `shap.TreeExplainer` to calculate the impact of each feature on the final prediction for a single customer. These are our "top churn drivers."
+*   **Context-Aware XAI:** The foundation of our "Explainable AI". We use `shap.TreeExplainer` to calculate the impact of the **top 5 features** on the final prediction. These "SHAP drivers" are then fed into our custom-built `churn_analyzer.py` module, which generates factually consistent, context-aware insights.
 *   **Survival Analysis (CoxPH Model):** A statistical method that models the *time-to-event*. We use the `lifelines` library's `CoxPHFitter` to predict *when* a customer is likely to churn, providing a time-based risk dimension.
 *   **Quantile-Based Tiering:** A robust method for segmenting at-risk customers. Instead of using fixed probability thresholds, we rank churners by their probability score and group them into "High", "Medium", and "Low" risk tiers based on their percentile. This adapts to the model's probability distribution.
 *   **Centralized Logic:** All feature creation is centralized in `feature_engineering.py`, and all data preparation is handled by `data_processing.py` to prevent training-serving skew.
@@ -36,7 +36,7 @@ The entire system is orchestrated by the Streamlit dashboard, which executes the
            v (Executes)                                                      v (Executes)
 [1. prediction_pipeline.py]                                       [2. survival_prediction_pipeline.py]
    - Loads temp data                                                 - Loads temp data
-   - Predicts churn & SHAP drivers                                   - Predicts survival probabilities
+   - Predicts churn & Top 5 SHAP drivers                             - Predicts survival probabilities
    - SAVES --> [Dataset/retention_candidates.csv]                    - SAVES --> [Dataset/survival_predictions.csv]
            |                                                                 |
            |                                                                 v (Executes)
@@ -73,8 +73,8 @@ The entire system is orchestrated by the Streamlit dashboard, which executes the
     4.  **Serialization:** Saves the final trained model (`model.pkl`) and other assets.
 
 ### `churn_analyzer.py`
-**Purpose:** To be the "translation layer" between the technical model outputs and the business user.
-*   **Key Logic:** Contains the `generate_actionable_insight` function, which uses a mapping of SHAP drivers and survival risk tiers to generate a human-readable text summary for each customer.
+**Purpose:** The "translation layer" between the technical model outputs and the business user. This is the core of our context-aware insight engine.
+*   **Key Logic:** The `generate_actionable_insight` function takes the top 5 SHAP drivers and cross-references them with the customer's actual data. This allows it to generate factually consistent insights, correctly identifying not just risk factors but also "protective factors" (e.g., "Their subscription to Tech Support is a significant positive factor..."). It is designed to be robust and avoid making nonsensical statements.
 
 ### `master_retention_pipeline.py`
 **Purpose:** The central orchestrator that creates the final Churn Risk Profile.
@@ -84,7 +84,7 @@ The entire system is orchestrated by the Streamlit dashboard, which executes the
 **Purpose:** The user-facing interface for the entire system.
 *   **Key Logic:**
     *   **Batch Processing:** Provides a file uploader that triggers a `subprocess` call to run the entire sequence of pipelines, displaying the final unified result.
-    *   **Real-time Analysis:** Includes a form for single-customer data entry, which calls the `/predict` endpoint on the FastAPI and displays the key churn drivers.
+    *   **Real-time Analysis:** Includes a form for single-customer data entry, which calls the `/predict` endpoint on the FastAPI and displays the top 5 key churn drivers and a generated insight.
 
 ---
 
