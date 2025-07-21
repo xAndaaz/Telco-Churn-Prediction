@@ -9,14 +9,13 @@ import pickle
 import matplotlib.pyplot as plt
 import shap
 
-# --- PAGE CONFIGURATION ---
 st.set_page_config(
     page_title="Customer Churn Dashboard",
     page_icon="📊",
     layout="wide"
 )
 
-# --- INITIALIZE SESSION STATE ---
+# INITIALIZE SESSION STATE
 if 'page' not in st.session_state:
     st.session_state['page'] = 'Batch Analysis'
 if 'batch_results_df' not in st.session_state:
@@ -24,11 +23,10 @@ if 'batch_results_df' not in st.session_state:
 if 'single_prediction_result' not in st.session_state:
     st.session_state['single_prediction_result'] = None
 
-# --- HELPER FUNCTIONS ---
 def convert_df_to_csv(df):
     return df.to_csv(index=False).encode('utf-8')
 
-# --- SIDEBAR NAVIGATION ---
+# SIDEBAR NAVIGATION
 with st.sidebar:
     st.title("📊 ChurnAdvisor")
     st.markdown("---")
@@ -38,13 +36,10 @@ with st.sidebar:
         st.session_state['page'] = 'Instant Prediction'
     st.markdown("---")
     st.info("This dashboard provides tools for predicting customer churn and understanding its key drivers.")
-
-# --- MAIN PAGE LAYOUT ---
 st.title(f"🔍 {st.session_state['page']}")
 
-# =================================================================================================
-# --- BATCH ANALYSIS PAGE ---
-# =================================================================================================
+# BATCH ANALYSIS PAGE ------------------------------------------------------------------------
+
 if st.session_state['page'] == 'Batch Analysis':
     st.markdown("Upload a CSV file with customer data to run the full analysis pipeline and generate churn risk profiles for all customers.")
     
@@ -132,9 +127,8 @@ if st.session_state['page'] == 'Batch Analysis':
             except Exception as e:
                 st.error(f"An error occurred while generating the SHAP plot: {e}")
 
-# =================================================================================================
-# --- INSTANT PREDICTION PAGE ---
-# =================================================================================================
+# INSTANT PREDICTION PAGE ----------------------------------------------------
+
 elif st.session_state['page'] == 'Instant Prediction':
     st.markdown("Enter a customer's details below to get an instant risk analysis.")
     

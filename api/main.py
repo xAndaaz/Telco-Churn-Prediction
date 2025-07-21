@@ -6,13 +6,11 @@ from pydantic import BaseModel
 import uvicorn
 import sys
 import os
-
-# Add the project root to the path to allow importing `churnadvisor`
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from churnadvisor.processing.data_processing import prepare_data_for_prediction
 from churnadvisor.analysis.churn_analyzer import generate_actionable_insight
 
-# --- 1. SETUP ---
+
 # Load model and explainer at startup
 model_path = os.path.join(os.path.dirname(__file__), '..', 'Models', 'model.pkl')
 with open(model_path, 'rb') as f:
@@ -27,8 +25,7 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# --- 2. PYDANTIC MODEL FOR INPUT DATA ---
-# This defines the structure of the request body
+# PYDANTIC MODEL FOR INPUT DATA 
 class CustomerData(BaseModel):
     gender: str
     SeniorCitizen: int
@@ -50,27 +47,22 @@ class CustomerData(BaseModel):
     MonthlyCharges: float
     TotalCharges: float
 
-# --- 3. API ENDPOINT ---
+# API ENDPOINT 
 @app.post("/predict")
 def predict_churn(customer_data: CustomerData):
     """
     Predicts churn for a single customer.
     
     Accepts customer data, processes it, and returns the churn prediction,
-    probability, and top 5 churn drivers.
+    probability, and top churn drivers.
     """
     # Convert input data to a pandas DataFrame
     df = pd.DataFrame([customer_data.dict()])
     
     # Prepare the data for the model
-    # Note: The function now returns two dataframes, we only need the first for the model
     df_prepared, _ = prepare_data_for_prediction(df)
-    
-    # Get prediction and probability
     prediction = model.predict(df_prepared)[0]
     probability = model.predict_proba(df_prepared)[:, 1][0]
-    
-    # Get SHAP explanations using the pre-loaded explainer
     shap_values = explainer.shap_values(df_prepared)
     
     shap_df = pd.DataFrame(shap_values, columns=df_prepared.columns)
@@ -92,6 +84,5 @@ def predict_churn(customer_data: CustomerData):
         "actionable_insight": insight
     }
 
-# 5. MAIN EXECUTION (for local testing)
 if __name__ == '__main__':
     uvicorn.run(app, host="127.0.0.1", port=8000)

@@ -15,7 +15,7 @@ def generate_churn_risk_profiles():
     Orchestrates the creation of unified churn risk profiles by combining the outputs
     of the classification and survival analysis pipelines.
     """
-    print("--- Starting Unified Churn Risk Profile Generation ---")
+    print("Starting Unified Churn Risk Profile Generation.....")
 
     # 1. Load the data from the two pipelines using absolute paths
     try:
@@ -29,11 +29,11 @@ def generate_churn_risk_profiles():
         print("Please ensure both 'prediction_pipeline.py' and 'survival_risk_analyzer.py' have been run successfully.")
         return
 
-    # 2. Merge the two dataframes into a single master view
+    # Merge the two dataframes into a single master view
     master_df = pd.merge(classification_results, survival_results, on='customerID', how='left')
     print("Successfully merged pipeline outputs.")
 
-    # 3. Implement Quantile-Based Risk Tiering
+    # Implement Quantile-Based Risk Tiering 
     churn_mask = master_df['churn_prediction'] == 1
     if churn_mask.any():
         churn_probs = master_df.loc[churn_mask, 'churn_probability']
@@ -58,8 +58,7 @@ def generate_churn_risk_profiles():
     master_df['ActionableInsight'] = master_df.apply(generate_actionable_insight, axis=1)
     print("Insights generated.")
 
-    # 5. Final Cleanup
-    # Drop the now redundant columns
+    # [CleanUP] Drop the now redundant columns
     final_df = master_df.drop(columns=['top_churn_drivers'])
     
     # Reorder columns for better readability
@@ -67,13 +66,12 @@ def generate_churn_risk_profiles():
     other_cols = [col for col in final_df.columns if col not in cols_to_front]
     final_df = final_df[cols_to_front + other_cols]
     
-    # 6. Save the final output
+# final output
     output_path = os.path.join(PROJECT_ROOT, 'Dataset', 'master_retention_plan.csv')
     final_df.to_csv(output_path, index=False)
     print(f"\nProcess complete. Unified Churn Risk Profiles saved to '{output_path}'")
     
     print("\n--- Sample of Final Churn Risk Profiles ---")
-    # Print a sample of the most important columns
     print(final_df[['customerID', 'ProbabilityRiskTier', 'TimeBasedRisk', 'ActionableInsight']].head())
 
 if __name__ == '__main__':

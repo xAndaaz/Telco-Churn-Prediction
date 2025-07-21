@@ -16,7 +16,6 @@ def generate_actionable_insight(customer_row):
     except (ValueError, SyntaxError):
         drivers = []
 
-    # --- Context-Aware Insight Mapping ---
     # For each driver, we check the customer's actual data to determine if it's a risk or a protective factor.
 
     if 'Contract_Month-to-month' in drivers:
@@ -59,7 +58,7 @@ def generate_actionable_insight(customer_row):
         elif customer_row.get('premium_services_count', 0) >= 4:
             positive_insights.append("Their high engagement with multiple premium services is a positive factor.")
 
-    # --- Combine Insights into a Final Summary ---
+    # Combine Insights into a Final Summary
     time_based_risk = customer_row.get('TimeBasedRisk', 'Risk timeline not available.')
     final_summary = f"**Urgency:** {time_based_risk}\n\n"
 

@@ -49,7 +49,6 @@ def prepare_data_for_survival(df: pd.DataFrame, is_training=False) -> pd.DataFra
     if is_training:
         _, clv_bins_survival = pd.cut(df['clv'], bins=3, retbins=True)
     else:
-        # A more robust solution would save/load these bins. For now, we recalculate.
         clv_bins_survival = [df['clv'].min(), df['clv'].quantile(0.33), df['clv'].quantile(0.66), df['clv'].max()]
 
     df['clv_tier'] = pd.cut(df['clv'], bins=clv_bins_survival, labels=['Low', 'Medium', 'High'], include_lowest=True)

@@ -4,16 +4,11 @@ import shap
 import os
 import sys
 import argparse
-
-# Add the project root to the Python path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
-
 from churnadvisor.processing.data_processing import prepare_data_for_prediction
-
-# Define the project root to construct absolute paths
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
 
-# --- 1. LOAD MODELS AND COLUMNS ---
+# LOAD MODELS AND COLUMNS 
 try:
     model_path = os.path.join(PROJECT_ROOT, 'Models', 'model.pkl')
     with open(model_path, 'rb') as f:
@@ -23,7 +18,7 @@ except FileNotFoundError as e:
     print("Please ensure you have run the training script to generate the necessary model files.")
     exit()
 
-# --- 2. CORE LOGIC FUNCTIONS ---
+# CORE LOGIC FUNCTIONS
 
 def run_prediction_pipeline(df):
     """
@@ -60,7 +55,7 @@ def run_prediction_pipeline(df):
     
     return results
 
-# --- SCRIPT EXECUTION ---
+# SCRIPT EXECUTION
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Run the churn prediction pipeline.")

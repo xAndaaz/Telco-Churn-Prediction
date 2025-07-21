@@ -29,7 +29,7 @@ def generate_time_based_risk(predictions_df: pd.DataFrame) -> pd.DataFrame:
     return predictions_df
 
 if __name__ == "__main__":
-    print("--- Generating Time-Based Risk Analysis from Survival Predictions ---")
+    print("Generating Time-Based Risk Analysis from Survival Predictions")
 
     try:
         input_path = os.path.join(PROJECT_ROOT, 'Dataset', 'survival_predictions.csv')
@@ -45,5 +45,5 @@ if __name__ == "__main__":
     final_risk_df.to_csv(output_path, index=False)
     print(f"Complete risk analysis saved to {output_path}")
 
-    print("\n--- Sample of Results ---")
+    print("\nSample of Results -----")
     print(final_risk_df[['customerID', 'TimeBasedRisk']].head())

@@ -18,7 +18,6 @@ def run_survival_prediction_pipeline(df: pd.DataFrame) -> pd.DataFrame:
     """
     print("Running Survival Prediction Pipeline...")
 
-    # 1. Load the Trained Survival Model
     try:
         model_path = os.path.join(PROJECT_ROOT, 'Models', 'survival_model.pkl')
         with open(model_path, 'rb') as f:
@@ -27,21 +26,17 @@ def run_survival_prediction_pipeline(df: pd.DataFrame) -> pd.DataFrame:
         print("Error: survival_model.pkl not found. Please run the survival training script first.")
         return None
 
-    # 2. Prepare the Data
     prepared_df = prepare_data_for_survival(df.copy(), is_training=False)
     model_columns = cph_model.params_.index.tolist()
     prepared_df = prepared_df.reindex(columns=model_columns, fill_value=0)
 
-    # 3. Predict Survival Functions
     print("Predicting survival functions...")
     survival_functions = cph_model.predict_survival_function(prepared_df)
 
-    # 4. Extract Predictions at Specific Time Horizons
     time_points = [6, 12, 24]
     predictions = {f'survival_prob_{time}_months': survival_functions.loc[time].values for time in time_points}
     predictions_df = pd.DataFrame(predictions, index=prepared_df.index)
 
-    # 5. Combine and Return
     results_df = df[['customerID']].join(predictions_df)
     print("Survival probabilities calculated.")
     

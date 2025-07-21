@@ -14,7 +14,7 @@ def engineer_features(df: pd.DataFrame, is_training: bool = False):
         pd.DataFrame: The dataframe with engineered features.
         list (optional): The calculated CLV bins, only returned if is_training is True.
     """
-    # 1. Calculate Customer Lifetime Value (CLV)
+    # Calculate Customer Lifetime Value (CLV)
     assumed_acquisition_cost = 100
     df['clv'] = (df['MonthlyCharges'] * df['tenure']) - assumed_acquisition_cost
 
@@ -24,7 +24,7 @@ def engineer_features(df: pd.DataFrame, is_training: bool = False):
         _, clv_bins = pd.qcut(df['clv'], q=3, labels=['Low', 'Medium', 'High'], retbins=True, duplicates='drop')
         df['clv_tier'] = pd.cut(df['clv'], bins=clv_bins, labels=['Low', 'Medium', 'High'], include_lowest=True)
     
-    # 2. Advanced Feature Engineering
+    # Advanced Feature Engineering
     if 'Churn' in df.columns:
         df['Churn'] = df['Churn'].replace({'No': 0, 'Yes': 1})
 
