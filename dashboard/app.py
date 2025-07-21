@@ -92,7 +92,7 @@ if st.session_state['page'] == 'Batch Analysis':
             
             if not at_risk_df.empty:
                 # Master View: A compact, scrollable table
-                summary_columns = ['customerID', 'ProbabilityRiskTier', 'TimeBasedRisk', 'clv_tier', 'churn_probability']
+                summary_columns = ['customerID', 'ProbabilityRiskTier', 'TimeBasedRisk', 'clv_tier', 'ActionableInsight']
                 st.dataframe(at_risk_df[summary_columns])
 
                 # Detail View: A dropdown to select a customer for detailed insight
