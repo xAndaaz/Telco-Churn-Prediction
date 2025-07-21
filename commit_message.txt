@@ -1,18 +1,8 @@
-refactor: Finalize project structure and polish dashboard
+feat: Implement final master-detail UI for dashboard results
 
-This commit concludes the project development with a major refactoring and final UI enhancements.
-
-- **Project Refactoring:**
-    - Restructured the entire project into a standard Python package (`churnadvisor`) for improved maintainability and professionalism.
-    - Organized all scripts into logical subdirectories (`pipelines`, `training`, `analysis`, `processing`).
-    - Updated all imports and file paths to use the new package structure, ensuring robustness with absolute paths.
-
-- **Bug Fix:**
-    - Resolved a critical `TypeError` in the `generate_actionable_insight` function.
-    - Corrected the function calls in both the batch pipeline and the API to prevent crashes during insight generation.
-
-- **Dashboard Polish:**
-    - Added a descriptive text block to the dashboard UI that explicitly highlights the advanced methodologies (XAI, Survival Analysis, CLV) used in the project. This makes the value proposition clear to the end-user.
-
-- **Documentation:**
-    - Updated `README.md`, `devReadme.md`, and `activity_log.md` to reflect all the latest changes, including the new project structure and features.
+- Implemented a professional master-detail interface for the batch analysis results to solve the issue of displaying long text insights.
+- The UI now features a compact, scrollable `st.dataframe` showing a summary of at-risk customers.
+- A `st.selectbox` allows the user to choose a specific customer from the table.
+- The full, unabridged `ActionableInsight` for the selected customer is then displayed in a dedicated detail view, clearly labeled with the `customerID`.
+- This provides a scalable and highly user-friendly interface that balances a clean overview with accessible, on-demand details.
+- Updated all documentation (`activity_log.md`, `devReadme.md`) to reflect this final UI enhancement.

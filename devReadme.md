@@ -78,7 +78,11 @@ The entire system is orchestrated by the Streamlit dashboard, which executes the
 **Purpose:** The "translation layer" between the technical model outputs and the business user. This is the core of our context-aware insight engine.
 
 ### `dashboard/app.py`
-**Purpose:** The user-facing interface for the entire system. It uses `st.session_state` for a persistent UI and calls the pipeline scripts using `subprocess`.
+**Purpose:** The user-facing interface for the entire system.
+*   **Key Logic:**
+    *   **State Management:** Uses `st.session_state` for a persistent UI.
+    *   **Batch Processing:** Implements a **master-detail interface**. It displays a compact, scrollable `st.dataframe` of at-risk customers (the master view). An `st.selectbox` allows the user to choose a customer, which then displays their full `ActionableInsight` in a dedicated container (the detail view).
+    *   **Instant Prediction:** Provides a form for on-demand analysis of a single customer.
 
 ---
 This guide should provide all the necessary details to understand, maintain, and extend the project. Welcome aboard!
