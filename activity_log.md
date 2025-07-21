@@ -200,3 +200,10 @@ This file logs the steps taken to improve the churn prediction model, the reason
     4.  The real-time prediction section was updated to provide advisory insights rather than prescriptive strategies.
 *   **Problem-Solving:** To allow the dashboard to run the pipelines, the `prediction_pipeline.py` and `survival_prediction_pipeline.py` scripts were modified to accept command-line arguments for input files, making them more flexible.
 *   **Outcome:** The dashboard is now a fully integrated, professional-grade tool that accurately reflects the project's sophisticated analytical capabilities.
+
+### Context-Aware Insight Engine
+
+*   **User Insight:** The user identified a critical flaw in the `churn_analyzer` logic. It was "context-blind" and would generate incorrect insights (e.g., flagging "Month-to-Month Contract" as a risk factor for a customer on a Two-Year plan).
+*   **Rationale:** To be truly professional, the insights must be factually consistent with the customer's actual data.
+*   **Action:** The `generate_actionable_insight` function was completely refactored. It now checks both the SHAP driver *and* the customer's corresponding data value to generate a contextually accurate insight. It can now correctly identify "protective factors" (e.g., "Their subscription to Tech Support is a significant positive factor...").
+*   **Outcome:** The project's final output is now not only unified but also intelligent and accurate, dramatically increasing its quality and reliability.

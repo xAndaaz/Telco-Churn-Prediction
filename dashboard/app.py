@@ -6,23 +6,23 @@ import json
 import sys
 import subprocess
 
-# --- PAGE CONFIGURATION ---
+# PAGE CONFIGURATION
 st.set_page_config(
     page_title="Customer Churn Dashboard",
     page_icon="📊",
     layout="wide"
 )
 
-# --- HELPER FUNCTIONS ---
+# HELPER FUNCTIONS
 def convert_df_to_csv(df):
     """Converts a DataFrame to a CSV string for downloading."""
     return df.to_csv(index=False).encode('utf-8')
 
-# --- 1. HEADER ---
+# HEADER
 st.title("Churn Prediction and Risk Profile Dashboard")
 st.markdown("An end-to-end tool to identify at-risk customers and understand the 'why' and 'when' of their churn risk.")
 
-# --- 2. BATCH ANALYSIS FROM CSV ---
+# BATCH ANALYSIS FROM CSV 
 st.header("Generate Churn Risk Profiles from a CSV")
 st.markdown("Upload a CSV file with customer data to run the full analysis pipeline.")
 
@@ -35,7 +35,7 @@ if uploaded_file is not None:
     input_df.to_csv(temp_input_path, index=False)
 
     if st.button("Generate Churn Risk Profiles"):
-        with st.spinner('Running end-to-end analysis... This may take a few moments.'):
+        with st.spinner('Running end-to-end analysis...'):
             try:
                 # Define the correct path to the python executable in the venv
                 python_executable = os.path.join('.venv', 'Scripts', 'python.exe')
@@ -87,7 +87,7 @@ if uploaded_file is not None:
             except Exception as e:
                 st.error(f"An unexpected error occurred: {e}")
 
-# --- 3. REAL-TIME CHURN PREDICTION ---
+# REAL-TIME CHURN PREDICTION (SINGLE CUSTOMER ANALYSIS)
 st.header("Real-time Single Customer Analysis")
 st.markdown("Enter a customer's details below to get an instant risk analysis.")
 
@@ -108,9 +108,9 @@ with st.form(key='prediction_form'):
         MultipleLines = st.selectbox("Multiple Lines", ["Yes", "No", "No phone service"])
         StreamingMovies = st.selectbox("Streaming Movies", ["Yes", "No", "No internet service"])
         PaperlessBilling = st.selectbox("Paperless Billing", ["Yes", "No"])
-        TotalCharges = st.number_input("Total Charges", min_value=0.0, value=1400.0, step=10.0)
+        TotalCharges = st.number_input("Total Charges", min_value=0.0, value=350.0, step=10.0)
     with col3:
-        tenure = st.slider("Tenure (months)", 1, 72, 24)
+        tenure = st.slider("Tenure (months)", 1, 72, 5)
         InternetService = st.selectbox("Internet Service", ["Fiber optic", "DSL",  "No"])
         OnlineSecurity = st.selectbox("Online Security", ["Yes", "No", "No internet service"])
         OnlineBackup = st.selectbox("Online Backup", ["Yes", "No", "No internet service"])

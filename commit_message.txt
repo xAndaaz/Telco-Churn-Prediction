@@ -1,5 +1,6 @@
-docs(readme): Update project documentation
+refactor(analyzer): Implement context-aware insight engine
 
-- Overhauled the main `README.md` to accurately reflect the current project structure, the unified "Churn Risk Profile" philosophy, and the streamlined user workflow.
-- Performed a comprehensive rewrite of `devReadme.md` to serve as a technical guide, detailing the current data flows, core concepts like SMOTEENN and quantile tiering, and the logic of each script.
-- Both documents are now aligned with the current, advisory-focused state of the project.
+- Refactored the `churn_analyzer.py` module to be "context-aware."
+- The insight generation logic now validates SHAP drivers against the customer's actual data, ensuring all insights are factually correct.
+- This new engine can correctly identify both risk factors (e.g., having a month-to-month contract) and protective factors (e.g., having tech support when other risks are high).
+- This change dramatically improves the accuracy, intelligence, and professional quality of the final Churn Risk Profile.
