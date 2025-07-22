@@ -1,10 +1,10 @@
 [
     {
         "model_name": "Decision Tree",
+        "timestamp": "2025-07-22T19:02:37.433315",
         "f1_score": 0.5045045045045045,
         "auc_score": 0.6618617701414807,
-        "training_time_seconds": 0.04285883903503418,
-        "run_timestamp": "2025-07-19T13:19:14.990482",
+        "training_time_seconds": 0.04384040832519531,
         "parameters": {
             "ccp_alpha": 0.0,
             "class_weight": null,
@@ -23,10 +23,10 @@
     },
     {
         "model_name": "Random Forest",
+        "timestamp": "2025-07-22T19:02:38.062275",
         "f1_score": 0.563338301043219,
         "auc_score": 0.8116215684548924,
-        "training_time_seconds": 0.5933942794799805,
-        "run_timestamp": "2025-07-19T13:19:15.622444",
+        "training_time_seconds": 0.5877087116241455,
         "parameters": {
             "bootstrap": true,
             "ccp_alpha": 0.0,
@@ -51,10 +51,10 @@
     },
     {
         "model_name": "XGBoost RF",
-        "f1_score": 0.6174920969441517,
-        "auc_score": 0.8385911964011162,
-        "training_time_seconds": 0.18281865119934082,
-        "run_timestamp": "2025-07-19T13:19:15.819495",
+        "timestamp": "2025-07-22T19:02:38.335052",
+        "f1_score": 0.5822784810126582,
+        "auc_score": 0.8344743776239705,
+        "training_time_seconds": 0.2598686218261719,
         "parameters": {
             "colsample_bynode": 0.8,
             "learning_rate": 1.0,
@@ -92,18 +92,19 @@
             "random_state": 42,
             "reg_alpha": null,
             "sampling_method": null,
-            "scale_pos_weight": 2.762541806020067,
+            "scale_pos_weight": null,
             "tree_method": null,
             "validate_parameters": null,
-            "verbosity": null
+            "verbosity": null,
+            "use_label_encoder": false
         }
     },
     {
         "model_name": "XGBoost",
+        "timestamp": "2025-07-22T19:02:38.446458",
         "f1_score": 0.5910165484633569,
         "auc_score": 0.8115012087735736,
-        "training_time_seconds": 0.09856367111206055,
-        "run_timestamp": "2025-07-19T13:19:15.930172",
+        "training_time_seconds": 0.09909915924072266,
         "parameters": {
             "objective": "binary:logistic",
             "base_score": null,
@@ -144,7 +145,8 @@
             "subsample": null,
             "tree_method": null,
             "validate_parameters": null,
-            "verbosity": null
+            "verbosity": null,
+            "use_label_encoder": false
         }
     }
 ]

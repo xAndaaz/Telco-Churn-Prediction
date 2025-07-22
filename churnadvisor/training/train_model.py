@@ -18,7 +18,7 @@ from churnadvisor.processing.feature_engineering import engineer_features
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
 
 # Load and Prepare Data
-print("--- Loading and Preparing Data ---")
+print("Loading and Preparing Data")
 df = pd.read_csv(os.path.join(PROJECT_ROOT, 'Dataset', 'newds.csv'))
 df, clv_bins = engineer_features(df, is_training=True)
 
@@ -31,14 +31,52 @@ X = df_encoded.drop("Churn", axis=1)
 y = df_encoded["Churn"]
 X_train, X_test, y_train, y_test = train_test_split(X, y, stratify=y, test_size=0.2, random_state=42)
 
-# Model Benchmarking
-experiment_results = [] # Placeholder
-with open(os.path.join(PROJECT_ROOT, 'experiments.json'), 'w') as f:
-    json.dump(experiment_results, f, indent=4, default=str)
+
+# Model Benchmarking---------------------------------------------------------------
+models_to_benchmark = {
+    "Decision Tree": DecisionTreeClassifier(random_state=42),
+    "Random Forest": RandomForestClassifier(random_state=42),
+    "XGBoost RF": XGBRFClassifier(random_state=42, use_label_encoder=False),
+    "XGBoost": XGBClassifier(random_state=42, use_label_encoder=False)
+}
+
+experiment_results = []
+experiments_file_path = os.path.join(PROJECT_ROOT, 'experiments.json')
+
+print("\nStarting Model Benchmarking (on original data)")
+for name, model in models_to_benchmark.items():
+    print(f"Training {name}...")
+    start_time = time.time()
+    # Set scale_pos_weight only for the standard XGBoost models
+    if name == "XGBoost":
+        scale_pos_weight = y_train.value_counts()[0] / y_train.value_counts()[1]
+        model.set_params(scale_pos_weight=scale_pos_weight)
+    model.fit(X_train, y_train)
+    training_time = time.time() - start_time
+    y_pred = model.predict(X_test)
+    y_proba = model.predict_proba(X_test)[:, 1] 
+
+    result = {
+        "model_name": name,
+        "timestamp": datetime.now().isoformat(),
+        "f1_score": f1_score(y_test, y_pred),
+        "auc_score": roc_auc_score(y_test, y_proba),
+        "training_time_seconds": training_time,
+        "parameters": model.get_params()
+    }
+    experiment_results.append(result)
+    print(f"Completed {name} in {training_time:.2f}s. F1: {result['f1_score']:.4f}, AUC: {result['auc_score']:.4f}")
+
+try:
+    with open(experiments_file_path, 'w') as f:
+        json.dump(experiment_results, f, indent=4, default=str)
+    print(f"--- Benchmarking Complete. Results saved to {experiments_file_path} ---\n")
+except Exception as e:
+    print(f"Error saving benchmark results: {e}")
 
 
 # Apply SMOTEENN
-print("\n--- Applying SMOTEENN to balance the training data... ---")
+print("\nApplying SMOTEENN to balance the training data------")
 smote_enn = SMOTEENN(random_state=42)
 X_train_resampled, y_train_resampled = smote_enn.fit_resample(X_train, y_train)
 
