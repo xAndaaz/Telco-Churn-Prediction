@@ -46,12 +46,12 @@ with st.sidebar:
     st.markdown("---")
     st.info("This dashboard provides tools for predicting customer churn and understanding its key drivers.")
 
-# --- MAIN PAGE LAYOUT ---
+#  MAIN PAGE LAYOUT ---------------------------------------------------------------
 st.title(f"🔍 {st.session_state['page']}")
 
-# =================================================================================================
-# --- BATCH ANALYSIS PAGE ---
-# =================================================================================================
+
+#  BATCH ANALYSIS PAGE ---------------------------------------------------------------------
+
 if st.session_state['page'] == 'Batch Analysis':
     st.markdown("Upload a CSV file with customer data to run the full analysis pipeline and generate churn risk profiles for all customers.")
     
@@ -95,7 +95,7 @@ if st.session_state['page'] == 'Batch Analysis':
             st.metric(label="At-Risk Customers Identified", value=results_df['churn_prediction'].sum())
 
         with st.container(border=True):
-            st.subheader("📄 At-Risk Customer Overview")
+            st.subheader("📄 At-Risk Customer Overview (Download full csv from button below)")
             st.markdown("This table provides a high-level, scrollable overview of all at-risk customers. Select a customer from the dropdown menu below to see their detailed, unabridged **Actionable Insight**.")
             
             at_risk_df = results_df[results_df['churn_prediction'] == 1].copy()
@@ -128,7 +128,7 @@ if st.session_state['page'] == 'Batch Analysis':
 
         with st.container(border=True):
             st.subheader("📊 Feature Impact on Churn Prediction (Overall)")
-            st.markdown("This beeswarm plot shows the impact of the top features on the model's output for the entire dataset.")
+            st.markdown("This beeswarm plot shows the impact of the top features on the model's output for the entire provided dataset. The most influential features are shown at the top, with their impact on churn probability.")
             try:
                 with open('Models/shap_values.pkl', 'rb') as f: shap_values = pickle.load(f)
                 with open('Models/prepared_data.pkl', 'rb') as f: prepared_data = pickle.load(f)
@@ -241,18 +241,18 @@ elif st.session_state['page'] == 'Instant Prediction':
     # Display single prediction result if it exists
     if st.session_state['single_prediction_result'] is not None:
         st.markdown("---")
-        st.subheader("💡 Analysis Result")
+        st.subheader("💡 Analysis Result (for better analysis use batch prediction)")
         result = st.session_state['single_prediction_result']
         
         with st.container(border=True):
             churn_prob = result['churn_probability']
             if result['churn_prediction'] == 1:
-                st.error(f"This customer is **AT RISK** of churning with a probability score of **{churn_prob:.2f}**.")
+                st.error(f"This customer is **AT RISK** of churning.")
             else:
                 st.success(f"This customer is **NOT** at risk of churning (Probability Score: {churn_prob:.2f}).")
             
             st.subheader("Key Churn Drivers")                                             
-            st.info("The following factors were the most influential in this prediction:")       
+            st.info("The following factors were the most influential (can be positive or negative) in this prediction:")       
             for i, driver in enumerate(result['top_churn_drivers'], 1):                 
                 st.write(f"**{i}.** {driver.replace('_', ' ').title()}") 
 
