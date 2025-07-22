@@ -1,7 +1,7 @@
 # ChurnAdvisor: Customer Churn Prediction & Risk Analysis
 
 ![MIT License](https://img.shields.io/badge/License-MIT-green.svg)
-[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](YOUR_STREAMLIT_APP_URL_HERE)
+[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://telco-churn-advisor-8.streamlit.app)
 
 **ChurnAdvisor** is an end-to-end machine learning application that identifies at-risk customers and generates a holistic **Churn Risk Profile** for each one. Instead of prescribing generic actions, this tool provides a rich, multi-faceted advisory report that empowers business users to make informed, data-driven retention decisions.
 
