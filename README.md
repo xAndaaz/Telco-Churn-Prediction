@@ -9,7 +9,7 @@
 
 ## 🚀 Live Demo & Preview
 
-**[➡️ View the Live Application on Streamlit Community Cloud](YOUR_STREAMLIT_APP_URL_HERE)**
+**[➡️ View the Live Application on Streamlit Community Cloud](https://telco-churn-advisor-8.streamlit.app)**
 
 *(Please replace the link above with your actual Streamlit deployment URL.)*
 
@@ -36,7 +36,7 @@
 *   **Language:** Python
 *   **Frontend:** Streamlit
 *   **API:** FastAPI, Uvicorn
-*   **Core ML Libraries:** Scikit-learn, XGBoost, Lifelines (for Survival Analysis), Imbalanced-learn
+*   **Core ML Libraries:** Scikit-learn, XGBoost, Lifelines (for Survival Analysis), Imbalanced-learn(SMOTEEN)
 *   **Explainable AI (XAI):** SHAP
 *   **Data Manipulation:** Pandas, NumPy
 *   **Visualization:** Matplotlib, Seaborn
@@ -47,7 +47,7 @@
 
 ### 1. Clone the Repository
 ```bash
-git clone https://github.com/YOUR_USERNAME/YOUR_REPOSITORY.git
+git clone https://github.com/xAndaaz/telco-churn-prediction.git
 cd YOUR_REPOSITORY
 ```
 
@@ -70,11 +70,7 @@ python -m churnadvisor.training.train_survival_model
 ```
 
 ### 4. Launch the Application
-*   **First, start the API in one terminal:**
-    ```bash
-    python api/main.py
-    ```
-*   **Then, start the dashboard in a new terminal:**
+*   **Start the dashboard in a terminal:**
     ```bash
     streamlit run dashboard/app.py
     ```
