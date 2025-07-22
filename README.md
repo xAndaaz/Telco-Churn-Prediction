@@ -11,8 +11,9 @@
 
 **[➡️ View the Live Application on Streamlit Community Cloud](https://telco-churn-advisor-8.streamlit.app)**
 
-![ChurnAdvisor GIF Demo](https://github.com/user-attachments/assets/YOUR_GIF_ASSET_URL_HERE)
-*(**Recommendation:** Create a short, high-quality GIF showcasing the app's workflow—uploading a file, viewing the results, and using the Instant Prediction—and replace the link above.)*
+## ChurnAdvisor GIF Demo
+![AppWorking1](https://github.com/user-attachments/assets/93b7297f-6f3d-4d57-833d-364d75ab41ce)
+
 
 ---
 
