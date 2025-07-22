@@ -46,7 +46,7 @@
 ### 1. Clone the Repository
 ```bash
 git clone https://github.com/xAndaaz/telco-churn-prediction.git
-cd YOUR_REPOSITORY
+cd telco-churn-prediction
 ```
 
 ### 2. Set Up the Environment
