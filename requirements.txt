@@ -6,8 +6,6 @@ optuna
 shap
 matplotlib
 seaborn
-fastapi
-uvicorn
 streamlit
 requests
 pydantic
