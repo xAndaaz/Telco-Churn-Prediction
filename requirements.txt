@@ -7,7 +7,6 @@ shap
 matplotlib
 seaborn
 streamlit
-requests
 pydantic
 lifelines
 imbalanced-learn
