@@ -19,7 +19,7 @@ def generate_actionable_insight(customer_row):
     # For each driver, we check the customer's actual data to determine if it's a risk or a protective factor.
 
     if 'Contract_Month-to-month' in drivers:
-        if customer_row.get('Contract_Month-to-month') == 1:
+        if customer_row.get('Contract') == 'Month-to-month':
             negative_insights.append("They are on a flexible Month-to-Month contract, a primary risk factor due to low commitment.")
         else:
             positive_insights.append("Their long-term contract is a key positive factor reducing their churn risk.")
@@ -31,19 +31,19 @@ def generate_actionable_insight(customer_row):
             positive_insights.append("Their long tenure is a significant positive factor, indicating loyalty.")
 
     if 'InternetService_Fiber optic' in drivers:
-        if customer_row.get('InternetService_Fiber optic') == 1:
+        if customer_row.get('InternetService') == 'Fiber optic':
             negative_insights.append("The high cost of Fiber Optic internet is likely contributing to their churn risk.")
         else:
             positive_insights.append("Their choice of a non-premium internet service is a positive factor, suggesting they are not price-sensitive.")
 
     if 'PaymentMethod_Electronic check' in drivers:
-        if customer_row.get('PaymentMethod_Electronic check') == 1:
+        if customer_row.get('PaymentMethod') == 'Electronic check':
             negative_insights.append("Their use of Electronic Check, correlated with less stable payment patterns, is a risk factor.")
         else:
             positive_insights.append("Their use of an automatic or stable payment method is a positive contributor.")
 
     if 'TechSupport_No' in drivers:
-        if customer_row.get('TechSupport_No') == 1:
+        if customer_row.get('TechSupport') == 'No':
             negative_insights.append("A lack of tech support suggests they may feel unsupported or have unresolved technical issues.")
         else:
             positive_insights.append("Their subscription to Tech Support is a key protective factor.")
