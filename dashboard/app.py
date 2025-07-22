@@ -1,21 +1,29 @@
 import os
 import streamlit as st
 import pandas as pd
-import requests
 import json
 import sys
-import subprocess
 import pickle
 import matplotlib.pyplot as plt
 import shap
 
+# Add project root to path to allow importing churnadvisor
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+from churnadvisor.pipelines.prediction_pipeline import run_prediction_pipeline
+from churnadvisor.pipelines.survival_prediction_pipeline import run_survival_prediction_pipeline
+from churnadvisor.pipelines.survival_risk_analyzer import generate_time_based_risk
+from churnadvisor.pipelines.master_retention_pipeline import generate_churn_risk_profiles
+from churnadvisor.processing.data_processing import prepare_data_for_prediction
+from churnadvisor.analysis.churn_analyzer import generate_actionable_insight
+
+# --- PAGE CONFIGURATION ---
 st.set_page_config(
     page_title="Customer Churn Dashboard",
     page_icon="📊",
     layout="wide"
 )
 
-# INITIALIZE SESSION STATE
+# --- INITIALIZE SESSION STATE ---
 if 'page' not in st.session_state:
     st.session_state['page'] = 'Batch Analysis'
 if 'batch_results_df' not in st.session_state:
@@ -23,10 +31,11 @@ if 'batch_results_df' not in st.session_state:
 if 'single_prediction_result' not in st.session_state:
     st.session_state['single_prediction_result'] = None
 
+# --- HELPER FUNCTIONS ---
 def convert_df_to_csv(df):
     return df.to_csv(index=False).encode('utf-8')
 
-# SIDEBAR NAVIGATION
+# --- SIDEBAR NAVIGATION ---
 with st.sidebar:
     st.title("📊 ChurnAdvisor")
     st.markdown("---")
@@ -36,10 +45,13 @@ with st.sidebar:
         st.session_state['page'] = 'Instant Prediction'
     st.markdown("---")
     st.info("This dashboard provides tools for predicting customer churn and understanding its key drivers.")
+
+# --- MAIN PAGE LAYOUT ---
 st.title(f"🔍 {st.session_state['page']}")
 
-# BATCH ANALYSIS PAGE ------------------------------------------------------------------------
-
+# =================================================================================================
+# --- BATCH ANALYSIS PAGE ---
+# =================================================================================================
 if st.session_state['page'] == 'Batch Analysis':
     st.markdown("Upload a CSV file with customer data to run the full analysis pipeline and generate churn risk profiles for all customers.")
     
@@ -47,25 +59,28 @@ if st.session_state['page'] == 'Batch Analysis':
         uploaded_file = st.file_uploader("Choose a CSV file", type="csv")
         if uploaded_file is not None:
             if st.button("Generate Churn Risk Profiles", use_container_width=True):
-                temp_input_path = os.path.join('Dataset', 'temp_uploaded_data.csv')
-                pd.read_csv(uploaded_file).to_csv(temp_input_path, index=False)
+                input_df = pd.read_csv(uploaded_file)
                 
                 with st.spinner('Running end-to-end analysis... This may take a moment.'):
                     try:
-                        python_executable = os.path.join('.venv', 'Scripts', 'python.exe')
-                        # Run pipelines using the new structure
+                        # Run pipelines sequentially in-memory
                         st.info("Step 1/3: Running classification pipeline...")
-                        subprocess.run([python_executable, os.path.join('churnadvisor', 'pipelines', 'prediction_pipeline.py'), '--input', temp_input_path], check=True, capture_output=True, text=True)
-                        st.info("Step 2/3: Running survival analysis pipeline...")
-                        subprocess.run([python_executable, os.path.join('churnadvisor', 'pipelines', 'survival_prediction_pipeline.py'), '--input', temp_input_path], check=True, capture_output=True, text=True)
-                        subprocess.run([python_executable, os.path.join('churnadvisor', 'pipelines', 'survival_risk_analyzer.py')], check=True, capture_output=True, text=True)
-                        st.info("Step 3/3: Generating unified churn risk profiles...")
-                        subprocess.run([python_executable, os.path.join('churnadvisor', 'pipelines', 'master_retention_pipeline.py')], check=True, capture_output=True, text=True)
+                        classification_results = run_prediction_pipeline(input_df)
                         
-                        st.session_state['batch_results_df'] = pd.read_csv('Dataset/master_retention_plan.csv')
+                        st.info("Step 2/3: Running survival analysis pipeline...")
+                        survival_predictions = run_survival_prediction_pipeline(input_df)
+                        survival_risk_results = generate_time_based_risk(survival_predictions)
+                        
+                        st.info("Step 3/3: Generating unified churn risk profiles...")
+                        final_results = generate_churn_risk_profiles(classification_results, survival_risk_results)
+                        
+                        st.session_state['batch_results_df'] = final_results
                         st.success("Analysis complete!")
                     except Exception as e:
-                        st.error(f"An error occurred: {e}")
+                        st.error(f"An error occurred during the analysis: {e}")
+                        # Print traceback for debugging if needed
+                        import traceback
+                        traceback.print_exc()
 
     # Display batch results if they exist
     if st.session_state['batch_results_df'] is not None:
@@ -131,7 +146,50 @@ if st.session_state['page'] == 'Batch Analysis':
 
 elif st.session_state['page'] == 'Instant Prediction':
     st.markdown("Enter a customer's details below to get an instant risk analysis.")
-    
+
+    # Cached function to load model and explainer to prevent reloading on every run
+    @st.cache_resource
+    def load_model_and_explainer():
+        print("Loading model and explainer for instant prediction...")
+        model_path = os.path.join('Models', 'model.pkl')
+        with open(model_path, 'rb') as f:
+            model = pickle.load(f)
+        explainer = shap.TreeExplainer(model)
+        print("Model and explainer loaded.")
+        return model, explainer
+
+    # Function to perform a single prediction
+    def run_instant_prediction(customer_data_dict):
+        # This needs access to the data processing function
+        from churnadvisor.processing.data_processing import prepare_data_for_prediction
+        from churnadvisor.analysis.churn_analyzer import generate_actionable_insight
+        
+        model, explainer = load_model_and_explainer()
+        
+        df = pd.DataFrame([customer_data_dict])
+        df_prepared, _ = prepare_data_for_prediction(df)
+        
+        prediction = model.predict(df_prepared)[0]
+        probability = model.predict_proba(df_prepared)[:, 1][0]
+        shap_values = explainer.shap_values(df_prepared)
+        
+        shap_df = pd.DataFrame(shap_values, columns=df_prepared.columns)
+        top_drivers = shap_df.abs().iloc[0].nlargest(5).index.tolist()
+
+        customer_profile = df.iloc[0].copy()
+        customer_profile['churn_prediction'] = prediction
+        customer_profile['churn_probability'] = probability
+        customer_profile['top_churn_drivers'] = top_drivers
+        
+        insight = generate_actionable_insight(customer_profile)
+
+        return {
+            "churn_prediction": int(prediction),
+            "churn_probability": float(probability),
+            "top_churn_drivers": top_drivers,
+            "actionable_insight": insight
+        }
+
     with st.form(key='prediction_form'):
         st.subheader("📝 Customer Details")
         col1, col2, col3 = st.columns(3)
@@ -174,11 +232,8 @@ elif st.session_state['page'] == 'Instant Prediction':
                 "StreamingMovies": StreamingMovies, "Contract": Contract, "PaperlessBilling": PaperlessBilling, "PaymentMethod": PaymentMethod,
                 "MonthlyCharges": MonthlyCharges, "TotalCharges": TotalCharges
             }
-            api_url = "http://127.0.0.1:8000/predict"
             try:
-                response = requests.post(api_url, data=json.dumps(customer_data))
-                response.raise_for_status()
-                st.session_state['single_prediction_result'] = response.json()
+                st.session_state['single_prediction_result'] = run_instant_prediction(customer_data)
             except Exception as e:
                 st.error(f"An error occurred: {e}")
                 st.session_state['single_prediction_result'] = None
@@ -196,8 +251,8 @@ elif st.session_state['page'] == 'Instant Prediction':
             else:
                 st.success(f"This customer is **NOT** at risk of churning (Probability Score: {churn_prob:.2f}).")
             
-            st.subheader("Key Churn Drivers")
-            st.info("The following factors were the most influential in this prediction:")
-            for i, driver in enumerate(result['top_churn_drivers'], 1):
-                st.write(f"**{i}.** {driver.replace('_', ' ').title()}")
+            st.subheader("Key Churn Drivers")                                             
+            st.info("The following factors were the most influential in this prediction:")       
+            for i, driver in enumerate(result['top_churn_drivers'], 1):                 
+                st.write(f"**{i}.** {driver.replace('_', ' ').title()}") 
 
