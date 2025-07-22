@@ -23,19 +23,17 @@
 *   **Professional Project Structure:** All code is organized into a standard, maintainable Python package (`churnadvisor`).
 *   **Dual-Model System:** Combines a high-precision **XGBRFClassifier** (to predict *if* and *why*) with a **Cox Proportional Hazards** survival model (to predict *when*).
 *   **Context-Aware Insight Engine:** A sophisticated analysis module that intelligently interprets model outputs (SHAP drivers) in the context of each customer's actual data to generate factually consistent, actionable insights.
-*   **Robust Interactive Dashboard:** A user-friendly Streamlit application (`ChurnAdvisor`) built with state management for a seamless experience. It features:
+*   **Robust Interactive Dashboard:** A user-friendly Streamlit application (`ChurnAdvisor`) that runs as a single, self-contained process. It features:
     *   **Instant Prediction:** Real-time analysis for a single customer.
     *   **Batch Analysis:** Bulk processing of customer lists from a CSV file.
     *   **Advanced Visualization:** An interactive SHAP beeswarm plot to visualize global feature impact.
-*   **Production-Ready API:** A high-performance FastAPI endpoint serves the core classification model with low latency.
 
 ---
 
 ## 🛠️ Tech Stack
 
 *   **Language:** Python
-*   **Frontend:** Streamlit
-*   **API:** FastAPI, Uvicorn
+*   **Application Framework:** Streamlit
 *   **Core ML Libraries:** Scikit-learn, XGBoost, Lifelines (for Survival Analysis), Imbalanced-learn(SMOTEEN)
 *   **Explainable AI (XAI):** SHAP
 *   **Data Manipulation:** Pandas, NumPy
@@ -70,7 +68,7 @@ python -m churnadvisor.training.train_survival_model
 ```
 
 ### 4. Launch the Application
-*   **Start the dashboard in a terminal:**
+*   **Start the dashboard from the project root directory:**
     ```bash
     streamlit run dashboard/app.py
     ```

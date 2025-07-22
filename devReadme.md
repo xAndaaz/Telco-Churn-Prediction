@@ -19,7 +19,6 @@ The project follows a standard Python package structure to ensure maintainabilit
 │   ├── processing/          # Data cleaning, preparation, and feature engineering
 │   └── training/            # Model training and tuning scripts
 │
-├── api/                     # FastAPI application
 ├── dashboard/               # Streamlit dashboard application
 ├── scripts/                 # Standalone or one-off analysis scripts
 │
@@ -43,28 +42,22 @@ The project follows a standard Python package structure to ensure maintainabilit
 ---
 
 ## 4. The Unified Data Flow
-The entire system is orchestrated by the Streamlit dashboard, which executes the pipelines in sequence.
+The entire system is orchestrated by the Streamlit dashboard, which executes the pipelines in sequence and passes dataframes directly in-memory.
 
 ```
 [User Uploads CSV]
            |
            v
-[dashboard/app.py] --> Saves to [Dataset/temp_uploaded_data.csv]
-           |
-           v (Executes)
-[churnadvisor/pipelines/prediction_pipeline.py]
-           |
-           v (Executes)
-[churnadvisor/pipelines/survival_prediction_pipeline.py]
-           |
-           v (Executes)
-[churnadvisor/pipelines/survival_risk_analyzer.py]
-           |
-           v (Executes)
-[churnadvisor/pipelines/master_retention_pipeline.py]
+[dashboard/app.py] --> Calls prediction & survival pipelines in-memory
            |
            v
-[dashboard/app.py] --> Loads and displays the final result
+[churnadvisor/pipelines/*] --> Return DataFrames
+           |
+           v
+[dashboard/app.py] --> Calls master pipeline with in-memory DataFrames
+           |
+           v
+[dashboard/app.py] --> Loads and displays the final result DataFrame
 ```
 
 ---
