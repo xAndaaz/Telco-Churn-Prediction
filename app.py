@@ -76,24 +76,20 @@ if st.session_state['page'] == 'Batch Analysis':
                         # Load the uploaded data into a DataFrame
                         source_df = pd.read_csv(uploaded_file)
 
-                        # --- Pipeline Orchestration ---
-                        st.info("Step 1/4: Running classification pipeline...")
+                        # --- Pipeline Orchestration (In-Memory) ---
+                        st.info("Step 1/3: Running classification pipeline...")
                         prediction_results_df = run_prediction_pipeline(source_df)
-                        prediction_results_df.to_csv(os.path.join('Dataset', 'retention_candidates.csv'), index=False)
 
-                        st.info("Step 2/4: Running survival analysis pipeline...")
-                        survival_results_df = run_survival_prediction_pipeline(source_df)
-                        survival_results_df.to_csv(os.path.join('Dataset', 'survival_predictions.csv'), index=False)
+                        st.info("Step 2/3: Running survival analysis pipeline...")
+                        survival_predictions_df = run_survival_prediction_pipeline(source_df)
+                        survival_risk_df = generate_time_based_risk(survival_predictions_df)
 
-                        st.info("Step 3/4: Analyzing survival risk...")
-                        risk_input_df = pd.read_csv(os.path.join('Dataset', 'survival_predictions.csv'))
-                        risk_output_df = generate_time_based_risk(risk_input_df)
-                        risk_output_df.to_csv(os.path.join('Dataset', 'survival_risk_analysis.csv'), index=False)
-
-                        st.info("Step 4/4: Generating unified churn risk profiles...")
-                        generate_churn_risk_profiles() # This function reads and writes files internally
-
-                        st.session_state['batch_results_df'] = pd.read_csv('Dataset/master_retention_plan.csv')
+                        st.info("Step 3/3: Generating unified churn risk profiles...")
+                        # Call the refactored function with the dataframes in memory
+                        final_results_df = generate_churn_risk_profiles(prediction_results_df, survival_risk_df)
+                        
+                        # Store the final results in the session state
+                        st.session_state['batch_results_df'] = final_results_df
                         st.success("Analysis complete!")
 
                     except Exception as e:
