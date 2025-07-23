@@ -45,5 +45,5 @@ if __name__ == "__main__":
     final_risk_df.to_csv(output_path, index=False)
     print(f"Complete risk analysis saved to {output_path}")
 
-    print("\nSample of Results -----")
+    print("\nSample of Results -------")
     print(final_risk_df[['customerID', 'TimeBasedRisk']].head())

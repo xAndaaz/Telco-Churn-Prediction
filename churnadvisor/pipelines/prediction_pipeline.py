@@ -80,7 +80,7 @@ if __name__ == '__main__':
     prediction_results.to_csv(output_path, index=False)
 
     print(f"Pipeline complete. Results saved to '{output_path}'")
-    print("\n--- Sample of Results ---")
+    print("\nSample of Results =")
     print(prediction_results[['customerID', 'churn_prediction', 'churn_probability', 'top_churn_drivers']].head())
     print("\n")
 

@@ -3,10 +3,7 @@ import pickle
 import os
 import sys
 import argparse
-
-# Add the project root to the Python path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
-
 from churnadvisor.processing.data_processing import prepare_data_for_survival
 
 # Define the project root to construct absolute paths
@@ -65,7 +62,7 @@ if __name__ == "__main__":
         prediction_results.to_csv(output_path, index=False)
 
         print(f"Pipeline complete. Results saved to '{output_path}'")
-        print("\n--- Sample of Results ---")
+        print("\nSample of Results")
         print(prediction_results.head())
-        print("\n")
+
 
