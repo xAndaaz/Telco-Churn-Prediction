@@ -43,6 +43,8 @@ with st.sidebar:
         st.session_state['page'] = 'Batch Analysis'
     if st.button("Instant Prediction", use_container_width=True):
         st.session_state['page'] = 'Instant Prediction'
+    if st.button("Our Workflow", use_container_width=True):
+        st.session_state['page'] = 'Our Workflow'
     st.markdown("---")
     st.info("This dashboard provides tools for predicting customer churn and understanding its key drivers.")
 
@@ -102,7 +104,7 @@ if st.session_state['page'] == 'Batch Analysis':
             
             if not at_risk_df.empty:
                 # Master View: A compact, scrollable table
-                summary_columns = ['customerID', 'ProbabilityRiskTier', 'TimeBasedRisk', 'clv_tier', 'ActionableInsight']
+                summary_columns = ['customerID', 'ProbabilityRiskTier', 'TimeBasedRisk', 'clv_tier', 'Actionable Insight']
                 st.dataframe(at_risk_df[summary_columns])
 
                 # Detail View: A dropdown to select a customer for detailed insight
@@ -254,5 +256,19 @@ elif st.session_state['page'] == 'Instant Prediction':
             st.subheader("Key Churn Drivers")                                             
             st.info("The following factors were the most influential (can be positive or negative) in this prediction:")       
             for i, driver in enumerate(result['top_churn_drivers'], 1):                 
-                st.write(f"**{i}.** {driver.replace('_', ' ').title()}") 
+                st.write(f"**{i}.** {driver.replace('_', ' ').title()}")
+
+# OUR WORKFLOW PAGE ----------------------------------------------------
+elif st.session_state['page'] == 'Our Workflow':
+    st.markdown("This page details the sophisticated, end-to-end process used to build this advisory intelligence engine.")
+    try:
+        # Construct the correct path from dashboard/app.py to the root directory's file
+        workflow_path = os.path.join(os.path.dirname(__file__), '..', 'workflow_summary.txt')
+        with open(workflow_path, 'r') as f:
+            workflow_content = f.read()
+        st.markdown(workflow_content)
+    except FileNotFoundError:
+        st.error("Could not find the workflow summary file.")
+    except Exception as e:
+        st.error(f"An error occurred while loading the workflow details: {e}") 
 
