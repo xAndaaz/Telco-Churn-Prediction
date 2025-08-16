@@ -1,10 +1,10 @@
 [
     {
         "model_name": "Decision Tree",
-        "timestamp": "2025-07-22T19:02:37.433315",
+        "timestamp": "2025-08-17T00:26:27.379024",
         "f1_score": 0.5045045045045045,
         "auc_score": 0.6618617701414807,
-        "training_time_seconds": 0.04384040832519531,
+        "training_time_seconds": 0.04866743087768555,
         "parameters": {
             "ccp_alpha": 0.0,
             "class_weight": null,
@@ -23,10 +23,10 @@
     },
     {
         "model_name": "Random Forest",
-        "timestamp": "2025-07-22T19:02:38.062275",
+        "timestamp": "2025-08-17T00:26:28.116644",
         "f1_score": 0.563338301043219,
         "auc_score": 0.8116215684548924,
-        "training_time_seconds": 0.5877087116241455,
+        "training_time_seconds": 0.6916916370391846,
         "parameters": {
             "bootstrap": true,
             "ccp_alpha": 0.0,
@@ -51,10 +51,10 @@
     },
     {
         "model_name": "XGBoost RF",
-        "timestamp": "2025-07-22T19:02:38.335052",
+        "timestamp": "2025-08-17T00:26:28.386776",
         "f1_score": 0.5822784810126582,
         "auc_score": 0.8344743776239705,
-        "training_time_seconds": 0.2598686218261719,
+        "training_time_seconds": 0.25810742378234863,
         "parameters": {
             "colsample_bynode": 0.8,
             "learning_rate": 1.0,
@@ -101,10 +101,10 @@
     },
     {
         "model_name": "XGBoost",
-        "timestamp": "2025-07-22T19:02:38.446458",
+        "timestamp": "2025-08-17T00:26:28.779166",
         "f1_score": 0.5910165484633569,
         "auc_score": 0.8115012087735736,
-        "training_time_seconds": 0.09909915924072266,
+        "training_time_seconds": 0.37837696075439453,
         "parameters": {
             "objective": "binary:logistic",
             "base_score": null,
